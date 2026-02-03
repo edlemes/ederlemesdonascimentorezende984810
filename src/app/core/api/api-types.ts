@@ -9,3 +9,9 @@ export type PaginatedResponse<T> = {
   total?: number
   pageCount?: number
 }
+
+export type TokenManager = {
+  getToken: () => string | null
+  setToken: (token: string) => void
+  clearToken: () => void
+}
