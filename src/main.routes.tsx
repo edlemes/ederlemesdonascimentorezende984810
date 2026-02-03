@@ -2,7 +2,11 @@ import { Suspense, lazy } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import MainLayout from './app/shared/layouts/MainLayout';
 
-const HomePage = lazy(() => import('./app/pages/HomePage'));
+const PetsRoutes = lazy(() =>
+  import("./app/features/pets/pets.routes").then((m) => ({
+    default: m.PetsRoutes,
+  })),
+)
 
 const router = createBrowserRouter([
   {
@@ -10,7 +14,7 @@ const router = createBrowserRouter([
     element: (
       <MainLayout>
         <Suspense fallback={null}>
-          <HomePage />
+          <PetsRoutes />
         </Suspense>
       </MainLayout>
     ),
