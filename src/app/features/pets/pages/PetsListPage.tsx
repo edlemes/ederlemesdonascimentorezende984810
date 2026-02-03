@@ -5,6 +5,8 @@ import { authFacade } from "../../auth/facades/auth.facade"
 import type { Pet } from "../models/pet.model"
 import { PetCard } from "../components/PetCard"
 import { Pagination } from "../components/Pagination"
+import { EmptyState } from "../../../shared/components/EmptyState"
+import { useDebounce } from "../../../shared/hooks/useDebounce"
 
 export function PetsListPage() {
   const [pets, setPets] = useState<Pet[]>([])
@@ -14,6 +16,8 @@ export function PetsListPage() {
   const [isAuthReady, setIsAuthReady] = useState(false)
   const isFirstLoad = useRef(true)
   const previousSearch = useRef("")
+
+  const debouncedSearch = useDebounce(searchTerm, 500)
 
   useEffect(() => {
     const subPets = petsFacade.pets$.subscribe(setPets)
@@ -45,14 +49,14 @@ export function PetsListPage() {
 
     if (isFirstLoad.current) {
       isFirstLoad.current = false
-      previousSearch.current = searchTerm
+      previousSearch.current = debouncedSearch
       const savedPage = pagination.page > 0 ? pagination.page : 1
-      petsFacade.getAllPets(savedPage, searchTerm)
-    } else if (searchTerm !== previousSearch.current) {
-      previousSearch.current = searchTerm
-      petsFacade.getAllPets(1, searchTerm)
+      petsFacade.getAllPets(savedPage, debouncedSearch)
+    } else if (debouncedSearch !== previousSearch.current) {
+      previousSearch.current = debouncedSearch
+      petsFacade.getAllPets(1, debouncedSearch)
     }
-  }, [searchTerm, isAuthReady, pagination.page])
+  }, [debouncedSearch, isAuthReady, pagination.page])
 
   const handleSearch = (term: string) => {
     setSearchTerm(term)
@@ -64,7 +68,7 @@ export function PetsListPage() {
 
   const handlePageChange = (newPage: number) => {
     if (isAuthReady) {
-      petsFacade.getAllPets(newPage, searchTerm)
+      petsFacade.getAllPets(newPage, debouncedSearch)
       window.scrollTo({ top: 0, behavior: "smooth" })
     }
   }
@@ -152,39 +156,17 @@ export function PetsListPage() {
       )}
 
       {!loading && pets.length === 0 && (
-        <div className="flex flex-col items-center justify-center h-64 text-center">
-          <div className="text-gray-400 mb-4">
-            <svg
-              className="w-16 h-16 mx-auto"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-              />
-            </svg>
-          </div>
-          <h3 className="text-xl font-semibold text-gray-700 mb-2">
-            Nenhum pet encontrado
-          </h3>
-          <p className="text-gray-500 mb-4 max-w-md">
-            {searchTerm
+        <EmptyState
+          icon="pet"
+          title="Nenhum pet encontrado"
+          description={
+            searchTerm
               ? `Não encontramos pets com o nome "${searchTerm}". Tente outro termo ou limpe o filtro.`
-              : "Ainda não há pets cadastrados. Que tal adicionar o primeiro?"}
-          </p>
-          {searchTerm && (
-            <button
-              onClick={handleClearSearch}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
-            >
-              Limpar filtros
-            </button>
-          )}
-        </div>
+              : "Ainda não há pets cadastrados. Que tal adicionar o primeiro?"
+          }
+          actionLabel={searchTerm ? "Limpar filtros" : undefined}
+          onAction={searchTerm ? handleClearSearch : undefined}
+        />
       )}
     </div>
   )
