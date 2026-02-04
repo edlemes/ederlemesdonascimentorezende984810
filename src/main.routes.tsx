@@ -10,7 +10,7 @@ const PetsRoutes = lazy(() =>
 
 const router = createBrowserRouter([
   {
-    path: '/',
+    path: '/*',
     element: (
       <MainLayout>
         <Suspense fallback={null}>
