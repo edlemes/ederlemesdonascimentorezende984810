@@ -34,6 +34,8 @@ describe('TutoresFacade', () => {
         {
           id: 1,
           nome: 'João Silva',
+          email: 'joao@example.com',
+          cpf: 12345678901,
           telefone: '(65) 99999-9999',
           endereco: 'Rua Principal, 123',
           foto: { url: 'https://example.com/joao.png' },
@@ -51,6 +53,8 @@ describe('TutoresFacade', () => {
       {
         id: 1,
         nome: 'João Silva',
+        email: 'joao@example.com',
+        cpf: 12345678901,
         telefone: '(65) 99999-9999',
         endereco: 'Rua Principal, 123',
         fotoUrl: 'https://example.com/joao.png',
@@ -89,6 +93,8 @@ describe('TutoresFacade', () => {
     vi.mocked(mockTutoresService.getById).mockResolvedValue({
       id: 2,
       nome: 'Maria Santos',
+      email: 'maria@example.com',
+      cpf: 10987654321,
       telefone: '(65) 98888-8888',
       endereco: 'Av. Central, 456',
       foto: { url: 'https://example.com/maria.png' },
@@ -102,6 +108,8 @@ describe('TutoresFacade', () => {
     expect(emitted.at(-1)).toEqual({
       id: 2,
       nome: 'Maria Santos',
+      email: 'maria@example.com',
+      cpf: 10987654321,
       telefone: '(65) 98888-8888',
       endereco: 'Av. Central, 456',
       fotoUrl: 'https://example.com/maria.png',
@@ -146,12 +154,16 @@ describe('TutoresFacade', () => {
     vi.mocked(mockTutoresService.create).mockResolvedValue({
       id: 10,
       nome: 'Pedro Costa',
+      email: 'pedro@example.com',
+      cpf: 20202020202,
       telefone: '(65) 97777-7777',
       endereco: 'Rua Nova, 789',
     })
 
     const result = await facade.saveTutor({
       nome: 'Pedro Costa',
+      email: 'pedro@example.com',
+      cpf: 20202020202,
       telefone: '(65) 97777-7777',
       endereco: 'Rua Nova, 789',
     })
@@ -159,6 +171,8 @@ describe('TutoresFacade', () => {
     expect(result).toBe(10)
     expect(mockTutoresService.create).toHaveBeenCalledWith({
       nome: 'Pedro Costa',
+      email: 'pedro@example.com',
+      cpf: 20202020202,
       telefone: '(65) 97777-7777',
       endereco: 'Rua Nova, 789',
     })
@@ -168,6 +182,8 @@ describe('TutoresFacade', () => {
     vi.mocked(mockTutoresService.update).mockResolvedValue({
       id: 5,
       nome: 'Ana Lima',
+      email: 'ana.lima@example.com',
+      cpf: 30303030303,
       telefone: '(65) 96666-6666',
       endereco: 'Praça da Paz, 321',
     })
@@ -175,6 +191,8 @@ describe('TutoresFacade', () => {
     const result = await facade.saveTutor({
       id: 5,
       nome: 'Ana Lima',
+      email: 'ana.lima@example.com',
+      cpf: 30303030303,
       telefone: '(65) 96666-6666',
       endereco: 'Praça da Paz, 321',
     })
@@ -183,6 +201,8 @@ describe('TutoresFacade', () => {
     expect(mockTutoresService.update).toHaveBeenCalledWith(5, {
       id: 5,
       nome: 'Ana Lima',
+      email: 'ana.lima@example.com',
+      cpf: 30303030303,
       telefone: '(65) 96666-6666',
       endereco: 'Praça da Paz, 321',
     })
@@ -208,6 +228,8 @@ describe('TutoresFacade', () => {
     vi.mocked(mockTutoresService.getById).mockResolvedValue({
       id: 3,
       nome: 'T',
+      email: 't@example.com',
+      cpf: 40404040404,
       telefone: 'x',
       endereco: 'y',
       pets: [
@@ -237,6 +259,8 @@ describe('TutoresFacade', () => {
     vi.mocked(mockTutoresService.getById).mockResolvedValue({
       id: 1,
       nome: 'João Silva',
+      email: 'joao@example.com',
+      cpf: 12345678901,
       telefone: '(65) 99999-9999',
       endereco: 'Rua Principal, 123',
       foto: { url: 'http://example.com/tutor.jpg', id: 1 },
@@ -267,6 +291,8 @@ describe('TutoresFacade', () => {
     vi.mocked(mockTutoresService.getById).mockResolvedValue({
       id: 1,
       nome: 'João Silva',
+      email: 'joao@example.com',
+      cpf: 12345678901,
       telefone: '(65) 99999-9999',
       endereco: 'Rua Principal, 123',
     })
@@ -343,8 +369,8 @@ describe('TutoresFacade', () => {
   it('remove tutor do estado ao deleteTutor', async () => {
     vi.mocked(mockTutoresService.getAll).mockResolvedValue({
       content: [
-        { id: 1, nome: 'A', telefone: 'x', endereco: 'y' },
-        { id: 2, nome: 'B', telefone: 'x', endereco: 'y' },
+        { id: 1, nome: 'A', email: 'a@example.com', cpf: 11111111111, telefone: 'x', endereco: 'y' },
+        { id: 2, nome: 'B', email: 'b@example.com', cpf: 22222222222, telefone: 'x', endereco: 'y' },
       ],
       pageCount: 1,
       total: 2,
