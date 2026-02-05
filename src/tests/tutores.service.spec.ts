@@ -32,7 +32,7 @@ describe('TutoresService', () => {
     it('should fetch all tutores with default pagination', async () => {
       const mockResponse = {
         data: {
-          content: [{ id: 1, nome: 'João Silva', telefone: '123456789', endereco: 'Rua A' }],
+          content: [{ id: 1, nome: 'João Silva', email: 'joao@example.com', cpf: 12345678901, telefone: '123456789', endereco: 'Rua A' }],
           page: 0,
           size: 10,
           total: 1,
@@ -51,7 +51,7 @@ describe('TutoresService', () => {
     it('should fetch tutores with custom page and size', async () => {
       const mockResponse = {
         data: {
-          content: [{ id: 2, nome: 'Maria Santos', telefone: '987654321', endereco: 'Rua B' }],
+          content: [{ id: 2, nome: 'Maria Santos', email: 'maria@example.com', cpf: 10987654321, telefone: '987654321', endereco: 'Rua B' }],
           page: 2,
           size: 20,
           total: 50,
@@ -94,6 +94,8 @@ describe('TutoresService', () => {
       const mockTutor = {
         id: 1,
         nome: 'João Silva',
+        email: 'joao@example.com',
+        cpf: 12345678901,
         telefone: '123456789',
         endereco: 'Rua A, 123',
         pets: [],
@@ -123,7 +125,7 @@ describe('TutoresService', () => {
 
   describe('create()', () => {
     it('should create a new tutor', async () => {
-      const formData = { nome: 'Ana Costa', telefone: '11999999999', endereco: 'Av. Central, 500' }
+      const formData = { nome: 'Ana Costa', email: 'ana@example.com', cpf: 10203040506, telefone: '11999999999', endereco: 'Av. Central, 500' }
       const mockResponse = { data: { id: 10, ...formData } }
       vi.mocked(httpClient.post).mockResolvedValue(mockResponse)
 
@@ -144,7 +146,7 @@ describe('TutoresService', () => {
 
   describe('update()', () => {
     it('should update an existing tutor', async () => {
-      const formData = { nome: 'João Silva Updated', telefone: '11988888888', endereco: 'Rua A, 456' }
+      const formData = { nome: 'João Silva Updated', email: 'joao.updated@example.com', cpf: 12345678901, telefone: '11988888888', endereco: 'Rua A, 456' }
       const mockResponse = { data: { id: 1, ...formData } }
       vi.mocked(httpClient.put).mockResolvedValue(mockResponse)
 
