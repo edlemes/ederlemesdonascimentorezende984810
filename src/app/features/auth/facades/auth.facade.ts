@@ -12,6 +12,34 @@ const defaultEnvReader: EnvReader = (key: string) => {
   return env[key]
 }
 
+const tryGetJwtExpMs = (token: string): number | null => {
+  const parts = token.split('.')
+  if (parts.length < 2) {
+    return null
+  }
+
+  const payload = parts[1]
+  const base64 = payload.replace(/-/g, '+').replace(/_/g, '/')
+  const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=')
+
+  try {
+    if (typeof atob !== 'function') {
+      return null
+    }
+
+    const json = atob(padded)
+
+    const parsed = JSON.parse(json) as { exp?: number }
+    if (typeof parsed.exp !== 'number') {
+      return null
+    }
+
+    return parsed.exp * 1000
+  } catch {
+    return null
+  }
+}
+
 export class AuthFacade {
   private _user$ = new BehaviorSubject<User | null>(null)
   private _isAuthenticated$ = new BehaviorSubject<boolean>(false)
@@ -34,11 +62,40 @@ export class AuthFacade {
     this.restoreSession()
   }
 
+  private clearSession(): void {
+    this.tokenMgr.clearToken()
+    this._token$.next(null)
+    this._user$.next(null)
+    this._isAuthenticated$.next(false)
+  }
+
   private restoreSession(): void {
     const token = this.tokenMgr.getToken()
     if (token) {
       this._token$.next(token)
+
+      const expMs = tryGetJwtExpMs(token)
+      if (expMs !== null && expMs <= Date.now()) {
+        this.clearSession()
+        return
+      }
+
       this._isAuthenticated$.next(true)
+      this._isLoading$.next(true)
+
+      void this.authApi
+        .refresh()
+        .then((res) => {
+          if (!res?.token) {
+            throw new Error('Missing token')
+          }
+          this.tokenMgr.setToken(res.token)
+          this._token$.next(res.token)
+          this._user$.next(res.user ?? null)
+          this._isAuthenticated$.next(true)
+        })
+        .catch(() => this.clearSession())
+        .finally(() => this._isLoading$.next(false))
     }
   }
 
@@ -46,13 +103,12 @@ export class AuthFacade {
     this._isLoading$.next(true)
     try {
       const res = await this.authApi.login(credentials)
+      this.tokenMgr.setToken(res.token)
       this._token$.next(res.token)
       this._user$.next(res.user || null)
       this._isAuthenticated$.next(true)
     } catch (err) {
-      this._token$.next(null)
-      this._user$.next(null)
-      this._isAuthenticated$.next(false)
+      this.clearSession()
       throw err
     } finally {
       this._isLoading$.next(false)
@@ -70,19 +126,13 @@ export class AuthFacade {
     const password = this.envReader('VITE_AUTH_PASSWORD')
     
     if (username && password) {
-      try {
-        await this.login({ username, password })
-      } catch {
-        return
-      }
+      await this.login({ username, password }).catch(() => undefined)
     }
   }
 
   logout(): void {
     this.authApi.logout()
-    this._token$.next(null)
-    this._user$.next(null)
-    this._isAuthenticated$.next(false)
+    this.clearSession()
   }
 
   getToken(): string | null {
