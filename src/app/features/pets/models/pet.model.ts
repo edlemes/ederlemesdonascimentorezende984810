@@ -30,3 +30,11 @@ export type PaginationState = {
 };
 
 export type PetFormData = Omit<Pet, "id"> & { id?: number };
+
+export function hasTutor(pet: Pet): boolean {
+  return Boolean(pet.tutorId || (pet.tutores && pet.tutores.length > 0))
+}
+
+export function getPetStatusMessage(pet: Pet): string {
+  return hasTutor(pet) ? "Já tem um lar 💚" : "Procurando um lar 💛"
+}
