@@ -1,10 +1,47 @@
 import axios, { AxiosError } from 'axios';
 import type { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
+import type { TokenManager } from './api-types';
 
-export const API_URL = import.meta.env.VITE_API_URL || 'https://pet-manager-api.geia.vip';
 const STORAGE_KEYS = { ACCESS_TOKEN: 'pet_manager_token' };
 
-export const tokenManager = {
+let envOverride: Partial<Record<string, string>> | null = null;
+let redirectOverride: ((url: string) => void) | null = null;
+
+export const __testing = {
+  setEnv: (override: Partial<Record<string, string>> | null) => {
+    envOverride = override;
+  },
+  setRedirect: (override: ((url: string) => void) | null) => {
+    redirectOverride = override;
+  },
+  reset: () => {
+    envOverride = null;
+    redirectOverride = null;
+  },
+};
+
+const getEnvValue = (key: string): string | undefined => {
+  if (envOverride && key in envOverride) {
+    return envOverride[key];
+  }
+
+  const env = import.meta.env as unknown as Record<string, string | undefined>;
+  return env[key];
+};
+
+const getApiUrl = (): string => {
+  return getEnvValue('VITE_API_URL') || 'https://pet-manager-api.geia.vip';
+};
+
+export const API_URL = getApiUrl();
+
+type AuthError = Error & { isAuthError: true };
+
+const createAuthError = (): AuthError => {
+  return Object.assign(new Error('Authentication required'), { isAuthError: true as const });
+};
+
+export const tokenManager: TokenManager = {
   getToken: (): string | null => {
     return localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
   },
@@ -18,13 +55,11 @@ export const tokenManager = {
 
 export const api: AxiosInstance = axios.create({
   baseURL: API_URL,
-  headers: { 'Content-Type': 'application/json' },
   timeout: 10000,
 });
 
 const refreshApi = axios.create({
   baseURL: API_URL,
-  headers: { 'Content-Type': 'application/json' },
   timeout: 5000,
 });
 
@@ -71,15 +106,15 @@ const cleanupAuth = () => {
 };
 
 const attemptReAuthentication = async (): Promise<string | null> => {
-  const username = import.meta.env.VITE_AUTH_USERNAME;
-  const password = import.meta.env.VITE_AUTH_PASSWORD;
+  const username = getEnvValue('VITE_AUTH_USERNAME');
+  const password = getEnvValue('VITE_AUTH_PASSWORD');
 
   if (!username || !password) {
     return null;
   }
 
   try {
-    const response = await axios.post(`${API_URL}/autenticacao/login`, {
+    const response = await axios.post(`${getApiUrl()}/autenticacao/login`, {
       username,
       password,
     });
@@ -93,7 +128,7 @@ const attemptReAuthentication = async (): Promise<string | null> => {
     }
 
     return null;
-  } catch (error) {
+  } catch {
     return null;
   }
 };
@@ -126,7 +161,16 @@ const ensureAuthentication = async (): Promise<void> => {
 
 const redirectToLogin = () => {
   if (!window.location.pathname.includes('/login')) {
-    window.location.href = '/login';
+    if (redirectOverride) {
+      redirectOverride('/login');
+      return;
+    }
+
+    try {
+      window.location.href = '/login';
+    } catch {
+      return;
+    }
   }
 };
 
@@ -165,9 +209,7 @@ api.interceptors.response.use(
       }
       
       redirectToLogin();
-      const authError = new Error('Authentication required');
-      (authError as any).isAuthError = true;
-      return Promise.reject(authError);
+      return Promise.reject(createAuthError());
     }
 
     if (isRefreshing) {
@@ -203,7 +245,7 @@ api.interceptors.response.use(
       }
 
       const response = await refreshApi.put('/autenticacao/refresh', {}, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       const newToken = getTokenFromResponse(response.data);
@@ -231,9 +273,7 @@ api.interceptors.response.use(
       }
 
       redirectToLogin();
-      const authError = new Error('Authentication required');
-      (authError as any).isAuthError = true;
-      return Promise.reject(authError);
+      return Promise.reject(createAuthError());
     } finally {
       isRefreshing = false;
     }
