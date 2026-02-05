@@ -242,6 +242,8 @@ const mapRemoteTutor = (remote: RemoteTutor): Tutor => ({
   nome: remote.nome,
   telefone: remote.telefone,
   endereco: remote.endereco,
+  email: remote.email,
+  cpf: remote.cpf,
   fotoUrl: remote.foto?.url || remote.fotoUrl,
   fotoId: remote.foto?.id,
 })

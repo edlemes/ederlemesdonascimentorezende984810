@@ -3,6 +3,8 @@ export interface Tutor {
   nome: string;
   telefone: string;
   endereco: string;
+  email?: string;
+  cpf?: number;
   fotoUrl?: string;
   fotoId?: number;
 }
