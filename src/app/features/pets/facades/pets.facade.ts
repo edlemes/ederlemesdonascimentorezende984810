@@ -1,7 +1,8 @@
 import { BehaviorSubject, Observable } from 'rxjs'
 import { petsService } from '../api/pets.service'
 import type { Pet, PaginationState, PetFormData } from '../models/pet.model'
-import type { PetsService, RemotePet, RemotePetsResponse } from '../api/pets.service'
+import type { PetsService, RemotePet } from '../api/pets.service'
+import { tutoresService } from '../../tutores/api/tutores.service'
 
 export class PetsFacade {
   private _pets = new BehaviorSubject<Pet[]>([])
@@ -56,9 +57,31 @@ export class PetsFacade {
     this._error.next(null)
 
     try {
-      const response: RemotePetsResponse = await this.service.getAll(page, nome, size)
+      const [petsResponse, tutoresResponse] = await Promise.all([
+        this.service.getAll(page, nome, size),
+        tutoresService.getAll(1, '', 9999).catch(() => ({ content: [], pageCount: 0, total: 0 }))
+      ])
 
-      const content = response.content || []
+      const content = petsResponse.content || []
+      const tutoresList = tutoresResponse.content || []
+
+      const tutorPetsMap = new Map<number, number>()
+
+      if (tutoresList.length > 0) {
+        const tutorDetailsPromises = tutoresList.map(tutor => 
+          tutoresService.getById(tutor.id).catch(() => null)
+        )
+        
+        const tutorDetails = await Promise.all(tutorDetailsPromises)
+        
+        tutorDetails.forEach(tutor => {
+          if (tutor && tutor.pets && Array.isArray(tutor.pets)) {
+            tutor.pets.forEach(pet => {
+              tutorPetsMap.set(pet.id, tutor.id)
+            })
+          }
+        })
+      }
 
       const pets: Pet[] = content.flatMap((item: RemotePet) => {
         const id = Number(item.id)
@@ -66,16 +89,36 @@ export class PetsFacade {
           return []
         }
 
+        const tutorId = tutorPetsMap.get(id)
+        const tutorData = tutorId ? tutoresList.find(t => t.id === tutorId) : undefined
+
+        const tutorPhoto =
+          tutorData && tutorData.foto && tutorData.foto.id != null && tutorData.foto.url
+            ? { id: tutorData.foto.id, url: tutorData.foto.url }
+            : undefined
+
         return [
           {
             id,
             nome: item.nome,
             raca: item.raca,
-            especie: item.especie,
+            especie: item.especie || '',
             idade: item.idade,
             fotoUrl: item.foto?.url || item.fotoUrl,
             fotoId: item.foto?.id,
-            tutorId: item.tutorId,
+            tutorId: tutorId,
+            tutores: tutorData
+              ? [
+                  {
+                    id: tutorData.id,
+                    nome: tutorData.nome,
+                    telefone: tutorData.telefone,
+                    endereco: tutorData.endereco,
+                    fotoUrl: tutorData.foto?.url || tutorData.fotoUrl,
+                    foto: tutorPhoto,
+                  },
+                ]
+              : undefined,
           },
         ]
       })
@@ -83,8 +126,8 @@ export class PetsFacade {
       this._pets.next(pets)
       this._pagination.next({
         page,
-        totalPages: response.pageCount || 0,
-        totalElements: response.total || 0,
+        totalPages: petsResponse.pageCount || 0,
+        totalElements: petsResponse.total || 0,
       })
     } catch (error: unknown) {
       if (this.isAuthError(error)) return
