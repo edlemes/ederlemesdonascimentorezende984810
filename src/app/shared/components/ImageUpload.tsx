@@ -1,10 +1,10 @@
 import { useRef, useState } from "react"
 
 interface ImageUploadProps {
-  currentImageUrl?: string;
-  onFileSelect: (file: File | null) => void;
-  label?: string;
-  shape?: "circle" | "square";
+  currentImageUrl?: string
+  onFileSelect: (file: File | null) => void
+  label?: string
+  shape?: "circle" | "square"
 }
 
 export function ImageUpload({
@@ -58,7 +58,7 @@ export function ImageUpload({
 
   return (
     <div className="space-y-2">
-      <label className="block text-sm font-semibold text-gray-700">
+      <label className="block text-sm font-semibold text-gray-700 text-center">
         {label}
       </label>
 
