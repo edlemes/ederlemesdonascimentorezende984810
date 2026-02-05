@@ -1,4 +1,5 @@
 import { BehaviorSubject, Observable, interval } from 'rxjs'
+import type { Subscription } from 'rxjs'
 import { healthService } from './health.service'
 import type { HealthCheck, HealthStatus } from './health.service'
 
@@ -14,7 +15,7 @@ export class HealthStore {
   public health$: Observable<HealthCheck> = this._health$.asObservable()
   public isChecking$: Observable<boolean> = this._isChecking$.asObservable()
 
-  private intervalSubscription: any = null
+  private intervalSubscription: Subscription | null = null
 
   async performHealthCheck(): Promise<void> {
     if (this._isChecking$.value) {
@@ -26,7 +27,7 @@ export class HealthStore {
     try {
       const result = await healthService.checkHealth()
       this._health$.next(result)
-    } catch (error) {
+    } catch {
       this._health$.next({
         status: 'unhealthy',
         timestamp: Date.now(),
