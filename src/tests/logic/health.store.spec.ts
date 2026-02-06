@@ -1,14 +1,14 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { HealthStore } from '../../app/core/health/health.store'
-import { healthService } from '../../app/core/health/health.service'
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
+import { HealthStore } from "../../app/core/health/health.store"
+import { healthService } from "../../app/core/health/health.service"
 
-vi.mock('../../app/core/health/health.service', () => ({
+vi.mock("../../app/core/health/health.service", () => ({
   healthService: {
     checkHealth: vi.fn(),
   },
 }))
 
-describe('HealthStore', () => {
+describe("HealthStore", () => {
   let store: HealthStore
 
   beforeEach(() => {
@@ -22,10 +22,10 @@ describe('HealthStore', () => {
     vi.restoreAllMocks()
   })
 
-  describe('performHealthCheck()', () => {
-    it('should perform health check and update state', async () => {
+  describe("performHealthCheck()", () => {
+    it("deve realizar health check e atualizar estado", async () => {
       const mockHealthCheck = {
-        status: 'healthy' as const,
+        status: "healthy" as const,
         timestamp: Date.now(),
         apiAvailable: true,
       }
@@ -41,28 +41,39 @@ describe('HealthStore', () => {
       expect(healthService.checkHealth).toHaveBeenCalledOnce()
     })
 
-    it('should set isChecking to true during check', async () => {
+    it("deve definir isChecking como true durante verificação", async () => {
       let resolveHealthCheck: any
       vi.mocked(healthService.checkHealth).mockImplementation(
-        () => new Promise((resolve) => { resolveHealthCheck = resolve })
+        () =>
+          new Promise((resolve) => {
+            resolveHealthCheck = resolve
+          }),
       )
 
       const checkingStates: boolean[] = []
-      const sub = store.isChecking$.subscribe((value) => checkingStates.push(value))
+      const sub = store.isChecking$.subscribe((value) =>
+        checkingStates.push(value),
+      )
 
       const promise = store.performHealthCheck()
 
       expect(checkingStates).toContain(true)
 
-      resolveHealthCheck({ status: 'healthy', timestamp: Date.now(), apiAvailable: true })
+      resolveHealthCheck({
+        status: "healthy",
+        timestamp: Date.now(),
+        apiAvailable: true,
+      })
       await promise
 
       sub.unsubscribe()
       expect(checkingStates.at(-1)).toBe(false)
     })
 
-    it('should handle health check failure', async () => {
-      vi.mocked(healthService.checkHealth).mockRejectedValue(new Error('API down'))
+    it("deve tratar falha no health check", async () => {
+      vi.mocked(healthService.checkHealth).mockRejectedValue(
+        new Error("API indisponível"),
+      )
 
       const emitted: any[] = []
       const sub = store.health$.subscribe((value) => emitted.push(value))
@@ -71,30 +82,41 @@ describe('HealthStore', () => {
 
       sub.unsubscribe()
       const lastEmitted = emitted.at(-1)
-      expect(lastEmitted.status).toBe('unhealthy')
+      expect(lastEmitted.status).toBe("unhealthy")
       expect(lastEmitted.apiAvailable).toBe(false)
     })
 
-    it('should not start new check if already checking', async () => {
+    it("não deve iniciar nova verificação se já estiver verificando", async () => {
       let resolveHealthCheck: any
       vi.mocked(healthService.checkHealth).mockImplementation(
-        () => new Promise((resolve) => { resolveHealthCheck = resolve })
+        () =>
+          new Promise((resolve) => {
+            resolveHealthCheck = resolve
+          }),
       )
 
       const promise1 = store.performHealthCheck()
       const promise2 = store.performHealthCheck()
 
-      resolveHealthCheck({ status: 'healthy', timestamp: Date.now(), apiAvailable: true })
+      resolveHealthCheck({
+        status: "healthy",
+        timestamp: Date.now(),
+        apiAvailable: true,
+      })
       await Promise.all([promise1, promise2])
 
       expect(healthService.checkHealth).toHaveBeenCalledOnce()
     })
 
-    it('should reset isChecking even on error', async () => {
-      vi.mocked(healthService.checkHealth).mockRejectedValue(new Error('Network error'))
+    it("deve resetar isChecking mesmo em caso de erro", async () => {
+      vi.mocked(healthService.checkHealth).mockRejectedValue(
+        new Error("Erro de rede"),
+      )
 
       const checkingStates: boolean[] = []
-      const sub = store.isChecking$.subscribe((value) => checkingStates.push(value))
+      const sub = store.isChecking$.subscribe((value) =>
+        checkingStates.push(value),
+      )
 
       await store.performHealthCheck()
 
@@ -103,10 +125,10 @@ describe('HealthStore', () => {
     })
   })
 
-  describe('startPeriodicCheck()', () => {
-    it('should start periodic health checks', async () => {
+  describe("startPeriodicCheck()", () => {
+    it("deve iniciar verificações periódicas de saúde", async () => {
       vi.mocked(healthService.checkHealth).mockResolvedValue({
-        status: 'healthy',
+        status: "healthy",
         timestamp: Date.now(),
         apiAvailable: true,
       })
@@ -114,7 +136,8 @@ describe('HealthStore', () => {
       store.startPeriodicCheck(1000)
       await vi.runOnlyPendingTimersAsync()
 
-      const initialCalls = vi.mocked(healthService.checkHealth).mock.calls.length
+      const initialCalls = vi.mocked(healthService.checkHealth).mock.calls
+        .length
       expect(initialCalls).toBeGreaterThanOrEqual(1)
 
       await vi.advanceTimersByTimeAsync(1000)
@@ -126,9 +149,9 @@ describe('HealthStore', () => {
       store.stopPeriodicCheck()
     })
 
-    it('should perform immediate check on start', async () => {
+    it("deve realizar verificação imediata ao iniciar", async () => {
       vi.mocked(healthService.checkHealth).mockResolvedValue({
-        status: 'healthy',
+        status: "healthy",
         timestamp: Date.now(),
         apiAvailable: true,
       })
@@ -141,16 +164,16 @@ describe('HealthStore', () => {
       store.stopPeriodicCheck()
     })
 
-    it('should stop previous interval before starting new one', async () => {
+    it("deve parar intervalo anterior antes de iniciar novo", async () => {
       vi.mocked(healthService.checkHealth).mockResolvedValue({
-        status: 'healthy',
+        status: "healthy",
         timestamp: Date.now(),
         apiAvailable: true,
       })
 
       store.startPeriodicCheck(1000)
       await vi.runOnlyPendingTimersAsync()
-      
+
       vi.clearAllMocks()
 
       store.startPeriodicCheck(1000)
@@ -161,9 +184,9 @@ describe('HealthStore', () => {
       store.stopPeriodicCheck()
     })
 
-    it('should use default interval of 30000ms', async () => {
+    it("deve usar intervalo padrão de 30000ms", async () => {
       vi.mocked(healthService.checkHealth).mockResolvedValue({
-        status: 'healthy',
+        status: "healthy",
         timestamp: Date.now(),
         apiAvailable: true,
       })
@@ -171,7 +194,8 @@ describe('HealthStore', () => {
       store.startPeriodicCheck()
       await vi.runOnlyPendingTimersAsync()
 
-      const initialCalls = vi.mocked(healthService.checkHealth).mock.calls.length
+      const initialCalls = vi.mocked(healthService.checkHealth).mock.calls
+        .length
       expect(initialCalls).toBeGreaterThanOrEqual(1)
 
       await vi.advanceTimersByTimeAsync(30000)
@@ -181,10 +205,10 @@ describe('HealthStore', () => {
     })
   })
 
-  describe('stopPeriodicCheck()', () => {
-    it('should stop periodic checks', async () => {
+  describe("stopPeriodicCheck()", () => {
+    it("deve parar verificações periódicas", async () => {
       vi.mocked(healthService.checkHealth).mockResolvedValue({
-        status: 'healthy',
+        status: "healthy",
         timestamp: Date.now(),
         apiAvailable: true,
       })
@@ -192,56 +216,61 @@ describe('HealthStore', () => {
       store.startPeriodicCheck(1000)
       await vi.runOnlyPendingTimersAsync()
 
-      const callsBeforeStop = vi.mocked(healthService.checkHealth).mock.calls.length
+      const callsBeforeStop = vi.mocked(healthService.checkHealth).mock.calls
+        .length
 
       store.stopPeriodicCheck()
       await vi.advanceTimersByTimeAsync(5000)
 
-      expect(vi.mocked(healthService.checkHealth).mock.calls.length).toBe(callsBeforeStop)
+      expect(vi.mocked(healthService.checkHealth).mock.calls.length).toBe(
+        callsBeforeStop,
+      )
     })
 
-    it('should be safe to call when no interval is running', () => {
+    it("deve ser seguro chamar quando nenhum intervalo estiver rodando", () => {
       expect(() => store.stopPeriodicCheck()).not.toThrow()
     })
 
-    it('should be safe to call multiple times', () => {
+    it("deve ser seguro chamar múltiplas vezes", () => {
       store.startPeriodicCheck(1000)
       store.stopPeriodicCheck()
-      
+
       expect(() => store.stopPeriodicCheck()).not.toThrow()
     })
   })
 
-  describe('getCurrentStatus()', () => {
-    it('should return current status', async () => {
+  describe("getCurrentStatus()", () => {
+    it("deve retornar status atual", async () => {
       vi.mocked(healthService.checkHealth).mockResolvedValue({
-        status: 'healthy',
+        status: "healthy",
         timestamp: Date.now(),
         apiAvailable: true,
       })
 
       await store.performHealthCheck()
 
-      expect(store.getCurrentStatus()).toBe('healthy')
+      expect(store.getCurrentStatus()).toBe("healthy")
     })
 
-    it('should return checking as initial status', () => {
-      expect(store.getCurrentStatus()).toBe('checking')
+    it("deve retornar checking como status inicial", () => {
+      expect(store.getCurrentStatus()).toBe("checking")
     })
 
-    it('should return unhealthy after failed check', async () => {
-      vi.mocked(healthService.checkHealth).mockRejectedValue(new Error('API down'))
+    it("deve retornar unhealthy após cheque falho", async () => {
+      vi.mocked(healthService.checkHealth).mockRejectedValue(
+        new Error("API indisponível"),
+      )
 
       await store.performHealthCheck()
 
-      expect(store.getCurrentStatus()).toBe('unhealthy')
+      expect(store.getCurrentStatus()).toBe("unhealthy")
     })
   })
 
-  describe('isHealthy()', () => {
-    it('should return true when status is healthy', async () => {
+  describe("isHealthy()", () => {
+    it("deve retornar true quando status for healthy", async () => {
       vi.mocked(healthService.checkHealth).mockResolvedValue({
-        status: 'healthy',
+        status: "healthy",
         timestamp: Date.now(),
         apiAvailable: true,
       })
@@ -251,23 +280,25 @@ describe('HealthStore', () => {
       expect(store.isHealthy()).toBe(true)
     })
 
-    it('should return false when status is unhealthy', async () => {
-      vi.mocked(healthService.checkHealth).mockRejectedValue(new Error('API down'))
+    it("deve retornar false quando o status for unhealthy", async () => {
+      vi.mocked(healthService.checkHealth).mockRejectedValue(
+        new Error("API indisponível"),
+      )
 
       await store.performHealthCheck()
 
       expect(store.isHealthy()).toBe(false)
     })
 
-    it('should return false when status is checking', () => {
+    it("deve retornar false quando status for checking", () => {
       expect(store.isHealthy()).toBe(false)
     })
   })
 
-  describe('observables', () => {
-    it('should emit health check updates via health$', async () => {
+  describe("observáveis", () => {
+    it("deve emitir atualizações de health check via health$", async () => {
       const mockHealthCheck = {
-        status: 'healthy' as const,
+        status: "healthy" as const,
         timestamp: Date.now(),
         apiAvailable: true,
       }
@@ -283,9 +314,9 @@ describe('HealthStore', () => {
       expect(emitted.at(-1)).toEqual(mockHealthCheck)
     })
 
-    it('should emit checking state via isChecking$', async () => {
+    it("deve emitir estado de verificação via isChecking$", async () => {
       vi.mocked(healthService.checkHealth).mockResolvedValue({
-        status: 'healthy',
+        status: "healthy",
         timestamp: Date.now(),
         apiAvailable: true,
       })

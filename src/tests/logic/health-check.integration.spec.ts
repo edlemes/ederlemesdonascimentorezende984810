@@ -1,83 +1,81 @@
-import { describe, it, expect, beforeAll } from 'vitest'
-import axios from 'axios'
+import { describe, it, expect, beforeAll } from "vitest"
+import axios from "axios"
 
-const BASE_URL = process.env.VITE_API_URL || 'http://localhost:5173'
-const API_URL = 'https://pet-manager-api.geia.vip'
+const BASE_URL = process.env.VITE_API_URL || "http://localhost:5173"
+const API_URL = "https://pet-manager-api.geia.vip"
 
-describe('Health Checks Integration Tests', () => {
-  describe('Readiness Probe', () => {
-    it('should successfully connect to API health endpoint', async () => {
+describe("Testes de Integração de Health Checks", () => {
+  describe("Sonda de Prontidão", () => {
+    it("deve conectar ao endpoint de saúde da API", async () => {
       const response = await axios.get(`${API_URL}/q/health`, {
         timeout: 5000,
       })
-      
+
       expect(response.status).toBe(200)
-      expect(response.data).toHaveProperty('status')
-      expect(response.data.status).toBe('UP')
+      expect(response.data).toHaveProperty("status")
+      expect(response.data.status).toBe("UP")
     }, 10000)
 
-    it('should respond within acceptable time', async () => {
+    it("deve responder em tempo aceitável", async () => {
       const startTime = Date.now()
-      
+
       await axios.get(`${API_URL}/q/health`, {
         timeout: 5000,
       })
-      
+
       const elapsed = Date.now() - startTime
       expect(elapsed).toBeLessThan(5000)
     }, 10000)
   })
 
-  describe('Application Health', () => {
-    it('should serve the root path', async () => {
+  describe("Saúde da Aplicação", () => {
+    it("deve servir o caminho raiz", async () => {
       const response = await axios.get(BASE_URL, {
         timeout: 5000,
       })
-      
+
       expect(response.status).toBe(200)
-      expect(response.headers['content-type']).toContain('text/html')
+      expect(response.headers["content-type"]).toContain("text/html")
     }, 10000)
 
-    it('should serve static assets', async () => {
+    it("deve servir assets estáticos", async () => {
       const response = await axios.get(BASE_URL, {
         timeout: 5000,
       })
-      
+
       expect(response.status).toBe(200)
       expect(response.data).toBeTruthy()
       expect(response.data.length).toBeGreaterThan(0)
     }, 10000)
   })
 
-  describe('Health Check Service Integration', () => {
+  describe("Integração do Health Check Service", () => {
     let healthService: any
 
     beforeAll(async () => {
-      const module = await import(
-        '../../app/core/health/health.service'
-      )
+      const module = await import("../../app/core/health/health.service")
       healthService = module.healthService
     })
 
-    it('should pass liveness check', async () => {
+    it("deve passar na verificação de liveness", async () => {
       const isAlive = await healthService.checkLiveness()
       expect(isAlive).toBe(true)
     }, 10000)
 
-    it('should pass readiness check', async () => {
+    it("deve passar na verificação de readiness", async () => {
       const isReady = await healthService.checkReadiness()
       expect(isReady).toBe(true)
     }, 10000)
 
-    it('should return complete health status', async () => {
+    it("deve retornar status de saúde completo", async () => {
       const health = await healthService.checkHealth()
-      
-      expect(health).toHaveProperty('status')
-      expect(health).toHaveProperty('timestamp')
-      expect(health).toHaveProperty('apiAvailable')
-      expect(health.status).toBe('healthy')
+
+      expect(health).toHaveProperty("status")
+      expect(health).toHaveProperty("timestamp")
+      expect(health).toHaveProperty("apiAvailable")
+      expect(health.status).toBe("healthy")
       expect(health.apiAvailable).toBe(true)
-      
+
       if (health.responseTime) {
         expect(health.responseTime).toBeGreaterThan(0)
         expect(health.responseTime).toBeLessThan(10000)
@@ -85,24 +83,24 @@ describe('Health Checks Integration Tests', () => {
     }, 10000)
   })
 
-  describe('Error Handling', () => {
-    it('should handle timeout gracefully', async () => {
+  describe("Tratamento de Erros", () => {
+    it("deve tratar timeout corretamente", async () => {
       try {
         await axios.get(`${API_URL}/q/health`, {
           timeout: 1,
         })
-        expect.fail('Should have thrown timeout error')
+        expect.fail("Deveria ter lançado erro de timeout")
       } catch (error: any) {
-        expect(error.code).toBe('ECONNABORTED')
+        expect(error.code).toBe("ECONNABORTED")
       }
     }, 10000)
 
-    it('should handle unavailable endpoint', async () => {
+    it("deve tratar endpoint indisponível", async () => {
       try {
         await axios.get(`${BASE_URL}/non-existent-endpoint`, {
           timeout: 5000,
         })
-        expect.fail('Should have thrown 404 error')
+        expect.fail("Deveria ter lançado erro 404")
       } catch (error: any) {
         expect(error.response?.status).toBe(404)
       }
