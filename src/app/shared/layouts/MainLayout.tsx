@@ -2,7 +2,7 @@ import { useEffect, type PropsWithChildren } from "react"
 import { Navbar } from "../../core/layouts/Navbar"
 import { Footer } from "../../core/layouts/Footer"
 import { ToastContainer } from "../components/ToastContainer"
-import { toastStore } from "../components/toast.store"
+import { toastStore } from "../toast/toast.store"
 import { petsFacade } from "../../features/pets/facades/pets.facade"
 import { tutoresFacade } from "../../features/tutores/facades/tutores.facade"
 
