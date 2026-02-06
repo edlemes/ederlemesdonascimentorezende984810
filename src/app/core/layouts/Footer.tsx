@@ -1,13 +1,13 @@
 export function Footer() {
   return (
-    <footer className="bg-white border-t border-gray-200 py-6">
-      <div className="container mx-auto px-4">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+    <footer className="bg-white border-t border-gray-200/50">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="py-3 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-gray-500 flex items-center gap-2">
-            <span>🐾</span>© {new Date().getFullYear()} Éder Lemes
+            © {new Date().getFullYear()} Éder Lemes
           </p>
           <p className="text-xs text-gray-400">
-            Governo do Estado de Mato Grosso
+            SEPLAG - Governo do Estado de Mato Grosso
           </p>
         </div>
       </div>
