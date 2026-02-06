@@ -4,11 +4,11 @@ import { authFacade as defaultAuthFacade } from "../../features/auth/facades/aut
 import type { AuthFacade } from "../../features/auth/facades/auth.facade"
 
 interface ProtectedRouteProps {
-  children: React.ReactNode;
-  authFacade?: AuthFacade;
+  children: React.ReactNode
+  authFacade?: AuthFacade
 }
 
-type AuthState = "loading" | "authenticated" | "unauthenticated";
+type AuthState = "loading" | "authenticated" | "unauthenticated"
 
 export function ProtectedRoute({
   children,
@@ -50,7 +50,11 @@ export function ProtectedRoute({
 
   if (authState === "loading") {
     return (
-      <div className="flex justify-center items-center h-screen">
+      <div
+        className="flex justify-center items-center h-screen"
+        role="status"
+        aria-label="Verificando autenticação"
+      >
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
       </div>
     )
