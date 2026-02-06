@@ -21,7 +21,7 @@ function createMockAuthFacade(
   } as unknown as AuthFacade
 }
 
-describe("ProtectedRoute Component", () => {
+describe("Componente ProtectedRoute", () => {
   it("deve renderizar spinner quando está carregando", () => {
     const mockFacade = createMockAuthFacade(false, true)
 
