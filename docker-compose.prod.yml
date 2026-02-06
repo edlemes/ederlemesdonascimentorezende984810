@@ -8,11 +8,9 @@ services:
         VITE_AUTH_USERNAME: ${VITE_AUTH_USERNAME:-}
         VITE_AUTH_PASSWORD: ${VITE_AUTH_PASSWORD:-}
     ports:
-      - "3000:80"
+      - "${HOST_PORT:-3000}:80"
     environment:
-      VITE_API_URL: ${VITE_API_URL:-https://pet-manager-api.geia.vip}
-      VITE_AUTH_USERNAME: ${VITE_AUTH_USERNAME:-}
-      VITE_AUTH_PASSWORD: ${VITE_AUTH_PASSWORD:-}
+      VITE_API_URL: ${VITE_API_URL}
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "/usr/local/bin/healthcheck.sh"]
