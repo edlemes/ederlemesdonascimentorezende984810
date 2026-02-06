@@ -67,6 +67,14 @@ export function ImageUpload({
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
+        role="button"
+        aria-label="Área de upload de imagem. Clique ou arraste uma imagem"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            inputRef.current?.click()
+          }
+        }}
         className={`
           relative ${sizeClasses} ${shapeClasses} cursor-pointer
           border-2 border-dashed transition-all duration-200
@@ -92,8 +100,9 @@ export function ImageUpload({
                     e.stopPropagation()
                     inputRef.current?.click()
                   }}
-                  className="p-2 bg-white/90 rounded-full shadow-lg hover:bg-white transition-colors"
+                  className="p-2 bg-white/90 rounded-full shadow-lg hover:bg-white transition-colors cursor-pointer"
                   title="Alterar foto"
+                  aria-label="Alterar foto"
                 >
                   <svg
                     className="w-4 h-4 text-gray-700"
@@ -144,6 +153,7 @@ export function ImageUpload({
           accept="image/*"
           onChange={handleInputChange}
           className="hidden"
+          aria-label="Selecionar arquivo de imagem"
         />
       </div>
     </div>

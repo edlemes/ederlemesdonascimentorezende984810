@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { toastStore, type Toast as ToastType } from "./toast.store"
+import { toastStore, type Toast as ToastType } from "../toast/toast.store"
 import { Toast } from "./Toast"
 
 export function ToastContainer() {

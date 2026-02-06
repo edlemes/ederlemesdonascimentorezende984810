@@ -1,9 +1,9 @@
 interface EmptyStateProps {
-  icon?: "search" | "pet" | "person" | "error";
-  title: string;
-  description?: string;
-  actionLabel?: string;
-  onAction?: () => void;
+  icon?: "search" | "pet" | "person" | "error"
+  title: string
+  description?: string
+  actionLabel?: string
+  onAction?: () => void
 }
 
 const icons = {
@@ -103,7 +103,7 @@ export function EmptyState({
       {actionLabel && onAction && (
         <button
           onClick={onAction}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-95"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-95"
         >
           {actionLabel}
         </button>

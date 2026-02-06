@@ -1,5 +1,8 @@
 import { useEffect, useState, type ReactNode } from "react"
-import type { Toast as ToastType, ToastType as TType } from "./toast.store"
+import type {
+  Toast as ToastType,
+  ToastType as TType,
+} from "../toast/toast.store"
 
 interface ToastProps {
   toast: ToastType;
@@ -133,7 +136,7 @@ export function Toast({ toast, onDismiss }: ToastProps) {
 
       <button
         onClick={handleDismiss}
-        className="shrink-0 p-1 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-1"
+        className="shrink-0 p-1 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-1"
         aria-label="Fechar notificação"
       >
         <svg

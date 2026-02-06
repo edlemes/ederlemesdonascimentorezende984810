@@ -33,7 +33,7 @@ export const Spinner = ({
     : "flex justify-center items-center h-64"
 
   return (
-    <div className={containerClasses}>
+    <div className={containerClasses} role="status" aria-label="Carregando">
       <div className="relative">
         <div
           className={`animate-spin rounded-full ${sizeClasses[size]} ${colorClasses[variant].border}`}

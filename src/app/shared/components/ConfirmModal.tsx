@@ -145,7 +145,7 @@ export function ConfirmModal({
             type="button"
             onClick={onCancel}
             disabled={isLoading}
-            className="flex-1 relative bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 text-gray-700 font-bold py-4 px-6 rounded-xl border-2 border-gray-200 hover:border-gray-300 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-gray-300/50 active:scale-[0.97] shadow-sm hover:shadow-md overflow-hidden group"
+            className="flex-1 relative bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 text-gray-700 font-bold py-4 px-6 rounded-xl border-2 border-gray-200 hover:border-gray-300 transition-all duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-gray-300/50 active:scale-[0.97] shadow-sm hover:shadow-md overflow-hidden group"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700" />
             <span className="relative">{cancelLabel}</span>
@@ -155,7 +155,7 @@ export function ConfirmModal({
             type="button"
             onClick={onConfirm}
             disabled={isLoading}
-            className={`flex-1 relative inline-flex items-center justify-center gap-2.5 ${styles.buttonBg} ${styles.buttonHover} text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 ${styles.focusRing} active:scale-[0.97] ${styles.buttonShadow} overflow-hidden group`}
+            className={`flex-1 relative inline-flex items-center justify-center gap-2.5 ${styles.buttonBg} ${styles.buttonHover} text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 ${styles.focusRing} active:scale-[0.97] ${styles.buttonShadow} overflow-hidden group`}
           >
             <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/25 to-white/0 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700" />
             {isLoading && (
