@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen } from '@testing-library/react'
 
-import { EmptyState } from '../app/shared/components/EmptyState'
+import { EmptyState } from '../../app/shared/components/EmptyState'
 
 describe('EmptyState', () => {
   it('renderiza título e descrição quando informado', () => {

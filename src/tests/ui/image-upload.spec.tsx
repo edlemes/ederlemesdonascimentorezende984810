@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen } from '@testing-library/react'
 
-import { ImageUpload } from '../app/shared/components/ImageUpload'
+import { ImageUpload } from '../../app/shared/components/ImageUpload'
 
 describe('ImageUpload', () => {
   it('chama onFileSelect ao selecionar imagem válida', () => {

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest"
 import { render } from "@testing-library/react"
-import { Spinner } from "../app/shared/components/Spinner"
+import { Spinner } from "../../app/shared/components/Spinner"
 
 describe("Spinner", () => {
   it("renderiza spinner azul por padrão", () => {

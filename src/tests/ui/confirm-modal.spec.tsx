@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen } from '@testing-library/react'
 
-import { ConfirmModal } from '../app/shared/components/ConfirmModal'
+import { ConfirmModal } from '../../app/shared/components/ConfirmModal'
 
 describe('ConfirmModal', () => {
   it('não renderiza quando isOpen=false', () => {

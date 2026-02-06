@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { HealthStore } from '../app/core/health/health.store'
-import { healthService } from '../app/core/health/health.service'
+import { HealthStore } from '../../app/core/health/health.store'
+import { healthService } from '../../app/core/health/health.service'
 
-vi.mock('../app/core/health/health.service', () => ({
+vi.mock('../../app/core/health/health.service', () => ({
   healthService: {
     checkHealth: vi.fn(),
   },

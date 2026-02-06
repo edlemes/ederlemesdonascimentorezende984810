@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { AuthService } from '../app/features/auth/api/auth.service'
-import { httpClient, tokenManager } from '../app/core/api/api.client'
+import { AuthService } from '../../app/features/auth/api/auth.service'
+import { httpClient, tokenManager } from '../../app/core/api/api.client'
 
-vi.mock('../app/core/api/api.client', () => ({
+vi.mock('../../app/core/api/api.client', () => ({
   httpClient: {
     post: vi.fn(),
     put: vi.fn(),

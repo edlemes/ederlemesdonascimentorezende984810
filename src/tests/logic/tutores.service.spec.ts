@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { TutoresService } from '../app/features/tutores/api/tutores.service'
-import { httpClient } from '../app/core/api/api.client'
+import { TutoresService } from '../../app/features/tutores/api/tutores.service'
+import { httpClient } from '../../app/core/api/api.client'
 
-vi.mock('../app/core/api/api.client', () => ({
+vi.mock('../../app/core/api/api.client', () => ({
   httpClient: {
     get: vi.fn(),
     post: vi.fn(),

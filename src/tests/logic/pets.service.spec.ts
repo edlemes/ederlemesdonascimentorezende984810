@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { PetsService } from '../app/features/pets/api/pets.service'
-import { httpClient } from '../app/core/api/api.client'
+import { PetsService } from '../../app/features/pets/api/pets.service'
+import { httpClient } from '../../app/core/api/api.client'
 
-vi.mock('../app/core/api/api.client', () => ({
+vi.mock('../../app/core/api/api.client', () => ({
   httpClient: {
     get: vi.fn(),
     post: vi.fn(),

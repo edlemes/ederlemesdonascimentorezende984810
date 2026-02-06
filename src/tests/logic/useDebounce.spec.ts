@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 
-import { useDebounce } from '../app/shared/hooks/useDebounce'
+import { useDebounce } from '../../app/shared/hooks/useDebounce'
 
 describe('useDebounce', () => {
   it('retorna valor inicial e atualiza após o delay', () => {

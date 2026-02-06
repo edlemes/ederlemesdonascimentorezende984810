@@ -2,8 +2,8 @@ import { describe, it, expect, vi } from "vitest"
 import { render, screen } from "@testing-library/react"
 import { MemoryRouter, Route, Routes } from "react-router-dom"
 import { BehaviorSubject } from "rxjs"
-import { ProtectedRoute } from "../app/core/routing/ProtectedRoute"
-import type { AuthFacade } from "../app/features/auth/facades/auth.facade"
+import { ProtectedRoute } from "../../app/core/routing/ProtectedRoute"
+import type { AuthFacade } from "../../app/features/auth/facades/auth.facade"
 
 function createMockAuthFacade(
   isAuthenticated: boolean,
