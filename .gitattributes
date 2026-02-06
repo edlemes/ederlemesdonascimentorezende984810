@@ -1,0 +1,13 @@
+# Set default behavior to automatically normalize line endings
+* text=auto
+
+# Export rules for archives
+dist/ export-ignore
+node_modules/ export-ignore
+coverage/ export-ignore
+
+# Mark files that should be treated as binary
+*.png binary
+*.jpg binary
+*.gif binary
+*.pdf binary
