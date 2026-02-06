@@ -2,7 +2,8 @@ import { Link } from "react-router-dom"
 import type { Tutor } from "../models/tutor.model"
 
 interface TutorCardProps {
-  tutor: Tutor;
+  tutor: Tutor
+  onDelete?: (tutor: Tutor) => void
 }
 
 export function TutorCard({ tutor }: TutorCardProps) {
@@ -10,7 +11,7 @@ export function TutorCard({ tutor }: TutorCardProps) {
 
   return (
     <Link to={`/tutores/${tutor.id}`} className="block group">
-      <article className="bg-white rounded-3xl shadow-lg shadow-gray-200/50 hover:shadow-xl hover:shadow-blue-200/30 overflow-hidden transition-all duration-500 ease-out transform hover:-translate-y-2 hover:scale-[1.02] border border-gray-100/50">
+      <article className="bg-white rounded-3xl shadow-lg shadow-gray-300 hover:shadow-xl hover:shadow-blue-200/80 overflow-hidden transition-all duration-500 ease-out transform hover:-translate-y-2 hover:scale-[1.02] border border-gray-100/50">
         <div className="relative aspect-square overflow-hidden bg-linear-to-br from-blue-100 via-cyan-50 to-blue-100">
           {tutor.fotoUrl ? (
             <img
@@ -28,7 +29,7 @@ export function TutorCard({ tutor }: TutorCardProps) {
             </div>
           )}
 
-          <div className="absolute top-3 left-3">
+          <div className="absolute top-3 right-3">
             <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold bg-white/90 backdrop-blur-sm text-blue-600 shadow-lg shadow-blue-100/50">
               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
@@ -36,25 +37,6 @@ export function TutorCard({ tutor }: TutorCardProps) {
               {displayPhone}
             </span>
           </div>
-
-          <div className="absolute top-3 right-3">
-            <button className="w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm shadow-lg flex items-center justify-center text-gray-400 hover:text-blue-500 hover:bg-blue-50 transition-all duration-300 hover:scale-110">
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                />
-              </svg>
-            </button>
-          </div>
-
           <div className="absolute bottom-0 left-0 right-0 h-20 bg-linear-to-t from-black/20 to-transparent" />
         </div>
 
