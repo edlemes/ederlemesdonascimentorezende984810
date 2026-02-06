@@ -9,19 +9,19 @@ import type {
 import type { Tutor, TutorFormData } from "../models/tutor.model"
 
 export type LinkedPet = {
-  id: number;
-  nome: string;
-  especie: string;
-  raca: string;
-  idade: number;
-  fotoUrl?: string;
-};
+  id: number
+  nome: string
+  especie: string
+  raca: string
+  idade: number
+  fotoUrl?: string
+}
 
 type PaginationState = {
-  page: number;
-  totalPages: number;
-  totalElements: number;
-};
+  page: number
+  totalPages: number
+  totalElements: number
+}
 
 export class TutoresFacade {
   private _tutores = new BehaviorSubject<Tutor[]>([])
@@ -77,7 +77,7 @@ export class TutoresFacade {
       })
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Failed to load tutors"
+        error instanceof Error ? error.message : "Falha ao carregar tutores"
       this._error.next(message)
       this._tutores.next([])
       this._pagination.next({ page: 0, totalPages: 0, totalElements: 0 })
@@ -106,7 +106,7 @@ export class TutoresFacade {
       }
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Failed to load tutor"
+        error instanceof Error ? error.message : "Falha ao carregar tutor"
       this._error.next(message)
       this._selectedTutor.next(null)
       this._linkedPets.next([])
@@ -128,7 +128,7 @@ export class TutoresFacade {
       return tutor.id
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Failed to save tutor"
+        error instanceof Error ? error.message : "Falha ao salvar tutor"
       this._error.next(message)
       throw error
     } finally {
@@ -147,7 +147,7 @@ export class TutoresFacade {
       )
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Failed to delete tutor"
+        error instanceof Error ? error.message : "Falha ao deletar tutor"
       this._error.next(message)
       throw error
     } finally {
@@ -164,7 +164,7 @@ export class TutoresFacade {
       await this.getTutorById(id)
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Failed to upload photo"
+        error instanceof Error ? error.message : "Falha no upload da foto"
       this._error.next(message)
       throw error
     } finally {
@@ -181,7 +181,7 @@ export class TutoresFacade {
       await this.getTutorById(tutorId)
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Failed to link pet"
+        error instanceof Error ? error.message : "Falha ao vincular pet"
       this._error.next(message)
       throw error
     } finally {
@@ -200,7 +200,7 @@ export class TutoresFacade {
       )
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Failed to unlink pet"
+        error instanceof Error ? error.message : "Falha ao desvincular pet"
       this._error.next(message)
       throw error
     } finally {
@@ -217,7 +217,7 @@ export class TutoresFacade {
       await this.getTutorById(id)
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to delete photo"
+        error instanceof Error ? error.message : "Falha ao deletar foto"
       this._error.next(errorMessage)
       throw error
     } finally {

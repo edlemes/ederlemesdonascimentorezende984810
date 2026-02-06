@@ -1,8 +1,8 @@
-import { BehaviorSubject, Observable } from 'rxjs'
-import { petsService } from '../api/pets.service'
-import type { Pet, PaginationState, PetFormData } from '../models/pet.model'
-import type { PetsService, RemotePet } from '../api/pets.service'
-import { tutoresService } from '../../tutores/api/tutores.service'
+import { BehaviorSubject, Observable } from "rxjs"
+import { petsService } from "../api/pets.service"
+import type { Pet, PaginationState, PetFormData } from "../models/pet.model"
+import type { PetsService, RemotePet } from "../api/pets.service"
+import { tutoresService } from "../../tutores/api/tutores.service"
 
 export class PetsFacade {
   private _pets = new BehaviorSubject<Pet[]>([])
@@ -35,21 +35,24 @@ export class PetsFacade {
   }
 
   private isAuthError(error: unknown): boolean {
-    if (!error || typeof error !== 'object') {
+    if (!error || typeof error !== "object") {
       return false
     }
 
     const record = error as Record<string, unknown>
-    const message = typeof record.message === 'string' ? record.message : undefined
+    const message =
+      typeof record.message === "string" ? record.message : undefined
     const isAuthError = record.isAuthError === true
 
     const response = record.response
     const status =
-      response && typeof response === 'object'
+      response && typeof response === "object"
         ? (response as Record<string, unknown>).status
         : undefined
 
-    return status === 401 || message === 'Authentication required' || isAuthError
+    return (
+      status === 401 || message === "Autenticação necessária" || isAuthError
+    )
   }
 
   async getAllPets(page: number, nome = "", size = 10): Promise<void> {
@@ -59,7 +62,9 @@ export class PetsFacade {
     try {
       const [petsResponse, tutoresResponse] = await Promise.all([
         this.service.getAll(page, nome, size),
-        tutoresService.getAll(1, '', 9999).catch(() => ({ content: [], pageCount: 0, total: 0 }))
+        tutoresService
+          .getAll(1, "", 9999)
+          .catch(() => ({ content: [], pageCount: 0, total: 0 })),
       ])
 
       const content = petsResponse.content || []
@@ -68,15 +73,15 @@ export class PetsFacade {
       const tutorPetsMap = new Map<number, number>()
 
       if (tutoresList.length > 0) {
-        const tutorDetailsPromises = tutoresList.map(tutor => 
-          tutoresService.getById(tutor.id).catch(() => null)
+        const tutorDetailsPromises = tutoresList.map((tutor) =>
+          tutoresService.getById(tutor.id).catch(() => null),
         )
-        
+
         const tutorDetails = await Promise.all(tutorDetailsPromises)
-        
-        tutorDetails.forEach(tutor => {
+
+        tutorDetails.forEach((tutor) => {
           if (tutor && tutor.pets && Array.isArray(tutor.pets)) {
-            tutor.pets.forEach(pet => {
+            tutor.pets.forEach((pet) => {
               tutorPetsMap.set(pet.id, tutor.id)
             })
           }
@@ -90,10 +95,15 @@ export class PetsFacade {
         }
 
         const tutorId = tutorPetsMap.get(id)
-        const tutorData = tutorId ? tutoresList.find(t => t.id === tutorId) : undefined
+        const tutorData = tutorId
+          ? tutoresList.find((t) => t.id === tutorId)
+          : undefined
 
         const tutorPhoto =
-          tutorData && tutorData.foto && tutorData.foto.id != null && tutorData.foto.url
+          tutorData &&
+          tutorData.foto &&
+          tutorData.foto.id != null &&
+          tutorData.foto.url
             ? { id: tutorData.foto.id, url: tutorData.foto.url }
             : undefined
 
@@ -102,7 +112,7 @@ export class PetsFacade {
             id,
             nome: item.nome,
             raca: item.raca,
-            especie: item.especie || '',
+            especie: item.especie || "",
             idade: item.idade,
             fotoUrl: item.foto?.url || item.fotoUrl,
             fotoId: item.foto?.id,
@@ -173,7 +183,7 @@ export class PetsFacade {
       if (this.isAuthError(error)) return
 
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to load pet"
+        error instanceof Error ? error.message : "Falha ao carregar pet"
       this._error.next(errorMessage)
       this._selectedPet.next(null)
     } finally {
@@ -197,7 +207,7 @@ export class PetsFacade {
       if (this.isAuthError(error)) throw error
 
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to save pet"
+        error instanceof Error ? error.message : "Falha ao salvar pet"
       this._error.next(errorMessage)
       throw error
     } finally {
@@ -217,7 +227,7 @@ export class PetsFacade {
       if (this.isAuthError(error)) return
 
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to delete pet"
+        error instanceof Error ? error.message : "Falha ao deletar pet"
       this._error.next(errorMessage)
       throw error
     } finally {
@@ -236,7 +246,7 @@ export class PetsFacade {
       if (this.isAuthError(error)) return
 
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to upload photo"
+        error instanceof Error ? error.message : "Falha no upload da foto"
       this._error.next(errorMessage)
       throw error
     } finally {
@@ -255,7 +265,7 @@ export class PetsFacade {
       if (this.isAuthError(error)) return
 
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to delete photo"
+        error instanceof Error ? error.message : "Falha ao deletar foto"
       this._error.next(errorMessage)
       throw error
     } finally {

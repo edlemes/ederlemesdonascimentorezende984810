@@ -1,9 +1,9 @@
-import { BehaviorSubject, Observable } from 'rxjs'
-import { authService } from '../api/auth.service'
-import { tokenManager } from '../../../core/api/api.client'
-import type { User, LoginRequest } from '../models/user.model'
-import type { AuthService } from '../api/auth.service'
-import type { TokenManager } from '../../../core/api/api-types'
+import { BehaviorSubject, Observable } from "rxjs"
+import { authService } from "../api/auth.service"
+import { tokenManager } from "../../../core/api/api.client"
+import type { User, LoginRequest } from "../models/user.model"
+import type { AuthService } from "../api/auth.service"
+import type { TokenManager } from "../../../core/api/api-types"
 
 export type EnvReader = (key: string) => string | undefined
 
@@ -13,24 +13,27 @@ const defaultEnvReader: EnvReader = (key: string) => {
 }
 
 const tryGetJwtExpMs = (token: string): number | null => {
-  const parts = token.split('.')
+  const parts = token.split(".")
   if (parts.length < 2) {
     return null
   }
 
   const payload = parts[1]
-  const base64 = payload.replace(/-/g, '+').replace(/_/g, '/')
-  const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=')
+  const base64 = payload.replace(/-/g, "+").replace(/_/g, "/")
+  const padded = base64.padEnd(
+    base64.length + ((4 - (base64.length % 4)) % 4),
+    "=",
+  )
 
   try {
-    if (typeof atob !== 'function') {
+    if (typeof atob !== "function") {
       return null
     }
 
     const json = atob(padded)
 
     const parsed = JSON.parse(json) as { exp?: number }
-    if (typeof parsed.exp !== 'number') {
+    if (typeof parsed.exp !== "number") {
       return null
     }
 
@@ -47,7 +50,8 @@ export class AuthFacade {
   private _token$ = new BehaviorSubject<string | null>(null)
 
   public user$: Observable<User | null> = this._user$.asObservable()
-  public isAuthenticated$: Observable<boolean> = this._isAuthenticated$.asObservable()
+  public isAuthenticated$: Observable<boolean> =
+    this._isAuthenticated$.asObservable()
   public isLoading$: Observable<boolean> = this._isLoading$.asObservable()
   public token$: Observable<string | null> = this._token$.asObservable()
 
@@ -55,7 +59,11 @@ export class AuthFacade {
   private tokenMgr: TokenManager
   private envReader: EnvReader
 
-  constructor(authService_?: AuthService, tokenManager_?: TokenManager, envReader_?: EnvReader) {
+  constructor(
+    authService_?: AuthService,
+    tokenManager_?: TokenManager,
+    envReader_?: EnvReader,
+  ) {
     this.authApi = authService_ ?? authService
     this.tokenMgr = tokenManager_ ?? tokenManager
     this.envReader = envReader_ ?? defaultEnvReader
@@ -87,7 +95,7 @@ export class AuthFacade {
         .refresh()
         .then((res) => {
           if (!res?.token) {
-            throw new Error('Missing token')
+            throw new Error("Token ausente")
           }
           this.tokenMgr.setToken(res.token)
           this._token$.next(res.token)
@@ -117,14 +125,14 @@ export class AuthFacade {
 
   async autoLogin(): Promise<void> {
     const existingToken = this.tokenMgr.getToken()
-    
+
     if (existingToken && this._isAuthenticated$.value) {
       return
     }
 
-    const username = this.envReader('VITE_AUTH_USERNAME')
-    const password = this.envReader('VITE_AUTH_PASSWORD')
-    
+    const username = this.envReader("VITE_AUTH_USERNAME")
+    const password = this.envReader("VITE_AUTH_PASSWORD")
+
     if (username && password) {
       await this.login({ username, password }).catch(() => undefined)
     }
@@ -143,7 +151,7 @@ export class AuthFacade {
 export const createAuthFacade = (
   authApi?: AuthService,
   tokenMgr?: TokenManager,
-  envReader?: EnvReader
+  envReader?: EnvReader,
 ): AuthFacade => new AuthFacade(authApi, tokenMgr, envReader)
 
 export const authFacade = createAuthFacade()
