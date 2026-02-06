@@ -1,6 +1,6 @@
-# Testes Automatizados — Pata Digital
+# Testes Automatizados Pata Digital
 
-Este diretório contém todos os testes automatizados do projeto, organizados seguindo as melhores práticas de engenharia de software e atendendo aos requisitos de qualidade do Edital 001/2026.
+Este diretório contém todos os testes automatizados do projeto, organizados seguindo as melhores práticas de engenharia de software.
 
 ---
 
@@ -28,19 +28,9 @@ O projeto implementa uma estratégia de testes em duas camadas:
 | **Logic** | `tests/logic/` | Services, Facades, Hooks | 14 arquivos |
 | **UI**    | `tests/ui/`    | Componentes React        | 22 arquivos |
 
-### Conformidade com Edital
+### Cobertura
 
-O Edital 001/2026 exige (Seção 3):
-
-> _"Testes: Incluir testes unitários básicos"_
-
-E para nível Sênior (Seção 5):
-
-> _"Qualidade: Cobertura de testes unitários"_
-
-**Implementação:**
-
-- 36 arquivos de teste
+- 37 arquivos de teste
 - > 99% de cobertura em lógica de negócio
 - Testes de integração para health checks
 - Mocks isolados para APIs
