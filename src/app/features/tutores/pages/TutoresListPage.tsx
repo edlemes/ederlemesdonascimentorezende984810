@@ -6,6 +6,7 @@ import type { Tutor } from "../models/tutor.model"
 import { TutorCard } from "../components/TutorCard"
 import { Pagination } from "../../pets/components/Pagination"
 import { EmptyState } from "../../../shared/components/EmptyState"
+import { Spinner } from "../../../shared/components/Spinner"
 import { useDebounce } from "../../../shared/hooks/useDebounce"
 
 export function TutoresListPage() {
@@ -86,6 +87,7 @@ export function TutoresListPage() {
             <input
               type="text"
               placeholder="Buscar por nome..."
+              aria-label="Buscar tutores por nome"
               className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
               value={searchTerm}
               onChange={(e) => handleSearch(e.target.value)}
@@ -106,7 +108,8 @@ export function TutoresListPage() {
             {searchTerm && (
               <button
                 onClick={handleClearSearch}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                aria-label="Limpar busca"
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
               >
                 <svg
                   className="w-4 h-4"
@@ -133,11 +136,7 @@ export function TutoresListPage() {
         </div>
       </div>
 
-      {loading && (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-200 border-t-blue-600" />
-        </div>
-      )}
+      {loading && <Spinner variant="blue" size="md" fullScreen={false} />}
 
       {!loading && tutores.length > 0 && (
         <>

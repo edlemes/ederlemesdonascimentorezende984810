@@ -1,29 +1,29 @@
 import { useEffect, useState } from "react"
-import { Link, useNavigate, useParams } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { tutoresFacade } from "../facades/tutores.facade"
 import { authFacade } from "../../auth/facades/auth.facade"
-import { toastStore } from "../../../shared/components/toast.store"
+import { toastStore } from "../../../shared/toast/toast.store"
 import { ImageUpload } from "../../../shared/components/ImageUpload"
 import { ConfirmModal } from "../../../shared/components/ConfirmModal"
+import { Spinner } from "../../../shared/components/Spinner"
+import { useMask } from "../../../shared/hooks/useMask"
+import { useValidatedId } from "../../../shared/hooks/useValidatedId"
 import type { TutorFormData } from "../models/tutor.model"
 
-function formatPhone(value: string): string {
-  const digits = value.replace(/\D/g, "").slice(0, 11)
-  if (digits.length <= 2) return digits
-  if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`
-  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`
-}
-
 export function TutorFormPage() {
-  const { id } = useParams<{ id: string }>()
+  const { id, isValid } = useValidatedId({ fallbackRoute: "/tutores" })
   const navigate = useNavigate()
-  const isEditMode = !!id
+  const isEditMode = isValid && id !== null
+  const { phone, cpf: cpfMask } = useMask()
 
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [isAuthReady, setIsAuthReady] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showSaveConfirmModal, setShowSaveConfirmModal] = useState(false)
+  const [showDeleteTutorModal, setShowDeleteTutorModal] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [photoMarkedForDeletion, setPhotoMarkedForDeletion] = useState(false)
   const [currentFotoId, setCurrentFotoId] = useState<number | undefined>()
   const [formData, setFormData] = useState<TutorFormData>({
@@ -31,6 +31,7 @@ export function TutorFormPage() {
     telefone: "",
     endereco: "",
   })
+  const [cpfDisplay, setCpfDisplay] = useState("")
 
   useEffect(() => {
     const subLoading = tutoresFacade.isLoading$.subscribe(setLoading)
@@ -42,8 +43,10 @@ export function TutorFormPage() {
           nome: tutor.nome,
           telefone: tutor.telefone,
           endereco: tutor.endereco,
+          cpf: tutor.cpf,
           fotoUrl: tutor.fotoUrl,
         })
+        setCpfDisplay(tutor.cpf ? cpfMask(String(tutor.cpf)) : "")
         setCurrentFotoId(tutor.fotoId)
       }
     })
@@ -64,12 +67,12 @@ export function TutorFormPage() {
       subTutor.unsubscribe()
       subAuth.unsubscribe()
     }
-  }, [isEditMode])
+  }, [isEditMode, cpfMask])
 
   useEffect(() => {
     if (isAuthReady) {
-      if (isEditMode) {
-        tutoresFacade.getTutorById(Number(id))
+      if (isEditMode && id) {
+        tutoresFacade.getTutorById(id)
       } else {
         tutoresFacade.clearSelectedTutor()
       }
@@ -81,7 +84,15 @@ export function TutorFormPage() {
   ) => {
     const { name, value } = e.target
     if (name === "telefone") {
-      setFormData((prev) => ({ ...prev, telefone: formatPhone(value) }))
+      setFormData((prev) => ({ ...prev, telefone: phone(value) }))
+    } else if (name === "cpf") {
+      const formatted = cpfMask(value)
+      setCpfDisplay(formatted)
+      const numericValue = formatted.replace(/\D/g, "")
+      setFormData((prev) => ({
+        ...prev,
+        cpf: numericValue ? Number(numericValue) : undefined,
+      }))
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }))
     }
@@ -95,6 +106,16 @@ export function TutorFormPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (isEditMode) {
+      setShowSaveConfirmModal(true)
+    } else {
+      await handleConfirmSave()
+    }
+  }
+
+  const handleConfirmSave = async () => {
+    setShowSaveConfirmModal(false)
 
     try {
       const savedTutorId = await tutoresFacade.saveTutor(formData)
@@ -118,15 +139,40 @@ export function TutorFormPage() {
     }
   }
 
+  const handleDeleteTutor = async () => {
+    if (!formData.id) return
+
+    setIsDeleting(true)
+
+    try {
+      await tutoresFacade.deleteTutor(formData.id)
+      toastStore.success(
+        "Tutor removido",
+        `${formData.nome} foi removido com sucesso.`,
+      )
+      navigate("/tutores")
+    } catch (error: unknown) {
+      const isAuthError =
+        error &&
+        typeof error === "object" &&
+        ("isAuthError" in error
+          ? (error as { isAuthError?: boolean }).isAuthError === true
+          : false)
+
+      if (isAuthError) {
+        navigate("/login")
+        return
+      }
+
+      toastStore.error("Erro", "Não foi possível remover o tutor.")
+    } finally {
+      setIsDeleting(false)
+      setShowDeleteTutorModal(false)
+    }
+  }
+
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-100 flex justify-center items-center">
-        <div className="relative">
-          <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200" />
-          <div className="absolute top-0 left-0 animate-spin rounded-full h-16 w-16 border-4 border-t-blue-600" />
-        </div>
-      </div>
-    )
+    return <Spinner variant="blue" size="lg" />
   }
 
   return (
@@ -212,7 +258,7 @@ export function TutorFormPage() {
                   <button
                     type="button"
                     onClick={() => setShowDeleteModal(true)}
-                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-red-600 hover:text-white bg-red-50 hover:bg-red-600 border border-red-200 hover:border-red-600 rounded-xl transition-all duration-200 active:scale-95"
+                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-red-600 hover:text-white bg-red-50 hover:bg-red-600 border border-red-200 hover:border-red-600 rounded-xl transition-all duration-200 cursor-pointer active:scale-95"
                   >
                     <svg
                       className="w-4 h-4"
@@ -277,6 +323,40 @@ export function TutorFormPage() {
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="group">
                   <label
+                    htmlFor="cpf"
+                    className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-3"
+                  >
+                    <svg
+                      className="w-5 h-5 text-blue-500"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"
+                      />
+                    </svg>
+                    CPF
+                    <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="cpf"
+                    name="cpf"
+                    value={cpfDisplay}
+                    onChange={handleChange}
+                    placeholder="999.999.999-99"
+                    maxLength={14}
+                    required
+                    className="w-full px-5 py-4 text-base bg-gradient-to-br from-gray-50 to-blue-50/30 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white outline-none transition-all duration-300 placeholder:text-gray-400 hover:border-blue-300 shadow-sm"
+                  />
+                </div>
+
+                <div className="group">
+                  <label
                     htmlFor="telefone"
                     className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-3"
                   >
@@ -302,7 +382,8 @@ export function TutorFormPage() {
                     name="telefone"
                     value={formData.telefone}
                     onChange={handleChange}
-                    placeholder="(65) 99999-9999"
+                    placeholder="(99) 99999-9999"
+                    maxLength={15}
                     required
                     className="w-full px-5 py-4 text-base bg-gradient-to-br from-gray-50 to-blue-50/30 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white outline-none transition-all duration-300 placeholder:text-gray-400 hover:border-blue-300 shadow-sm"
                   />
@@ -349,77 +430,102 @@ export function TutorFormPage() {
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 pt-8 border-t border-gray-100">
-              <button
-                type="submit"
-                disabled={saving}
-                className="flex-1 relative inline-flex items-center justify-center gap-3 bg-gradient-to-r from-blue-500 to-blue-900 hover:from-blue-500 hover:to-blue-900 text-white font-bold py-4 px-8 rounded-2xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-blue-500/50 active:scale-[0.97] shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 overflow-hidden group"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
-                {saving ? (
-                  <>
-                    <svg
-                      className="animate-spin h-5 w-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      />
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                      />
-                    </svg>
-                    <span className="relative z-10">Salvando...</span>
-                  </>
-                ) : (
-                  <>
-                    <svg
-                      className="w-5 h-5 relative z-10"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                    <span className="relative z-10">Salvar Tutor</span>
-                  </>
-                )}
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  navigate(isEditMode ? `/tutores/${id}` : "/tutores")
-                }
-                className="flex-1 inline-flex items-center justify-center gap-3 bg-white hover:bg-gray-50 text-gray-700 font-bold py-4 px-8 rounded-2xl border-2 border-gray-300 hover:border-gray-400 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-gray-300/50 active:scale-[0.97] shadow-sm hover:shadow-md"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
+            <div className="flex flex-col gap-4 pt-8 border-t border-gray-100">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="flex-1 relative inline-flex items-center justify-center gap-3 bg-gradient-to-r from-blue-500 to-blue-900 hover:from-blue-500 hover:to-blue-900 text-white font-bold py-4 px-8 rounded-2xl transition-all duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-blue-500/50 active:scale-[0.97] shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 overflow-hidden group"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-                Cancelar
-              </button>
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
+                  {saving ? (
+                    <>
+                      <svg
+                        className="animate-spin h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                        />
+                      </svg>
+                      <span className="relative z-10">Salvando...</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg
+                        className="w-5 h-5 relative z-10"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                      <span className="relative z-10">Salvar Tutor</span>
+                    </>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    navigate(isEditMode ? `/tutores/${id}` : "/tutores")
+                  }
+                  className="flex-1 inline-flex items-center justify-center gap-3 bg-white hover:bg-gray-50 text-gray-700 font-bold py-4 px-8 rounded-2xl border-2 border-gray-300 hover:border-gray-400 transition-all duration-300 cursor-pointer focus:outline-none focus:ring-4 focus:ring-gray-300/50 active:scale-[0.97] shadow-sm hover:shadow-md"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                  Cancelar
+                </button>{" "}
+              </div>
+              {isEditMode && (
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteTutorModal(true)}
+                  disabled={isDeleting}
+                  className="w-full inline-flex items-center justify-center gap-3 bg-red-50 hover:bg-red-600 text-red-600 hover:text-white font-bold py-4 px-8 rounded-2xl border-2 border-red-200 hover:border-red-600 transition-all duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-red-500/50 active:scale-[0.97] shadow-sm hover:shadow-lg hover:shadow-red-500/30"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                    />
+                  </svg>
+                  Remover Tutor
+                </button>
+              )}
             </div>
           </div>
         </form>
@@ -434,6 +540,30 @@ export function TutorFormPage() {
           variant="warning"
           onConfirm={handleDeletePhoto}
           onCancel={() => setShowDeleteModal(false)}
+        />
+
+        <ConfirmModal
+          isOpen={showSaveConfirmModal}
+          title="Confirmar Alterações"
+          message={`Deseja confirmar as alterações feitas em ${formData.nome}? Esta ação atualizará os dados do tutor.`}
+          confirmLabel={saving ? "Salvando..." : "Confirmar e Salvar"}
+          cancelLabel="Cancelar"
+          isLoading={saving}
+          variant="success"
+          onConfirm={handleConfirmSave}
+          onCancel={() => setShowSaveConfirmModal(false)}
+        />
+
+        <ConfirmModal
+          isOpen={showDeleteTutorModal}
+          title="Remover Tutor"
+          message={`Deseja realmente remover "${formData.nome}" permanentemente? Esta ação não pode ser desfeita.`}
+          confirmLabel="Remover"
+          cancelLabel="Cancelar"
+          isLoading={isDeleting}
+          variant="danger"
+          onConfirm={handleDeleteTutor}
+          onCancel={() => setShowDeleteTutorModal(false)}
         />
       </div>
     </div>
