@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pata Digital - Health Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            color: white;
+            padding: 30px 0;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        .dashboard {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .probe-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid #ccc;
+            transition: all 0.3s ease;
+        }
+        .probe-card.healthy {
+            border-left-color: #10b981;
+            background: #f0fdf4;
+        }
+        .probe-card.unhealthy {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+        }
+        .probe-card.checking {
+            border-left-color: #f59e0b;
+            background: #fffbeb;
+        }
+        .probe-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .probe-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        .status-badge {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        .status-badge.healthy {
+            background: #10b981;
+            color: white;
+        }
+        .status-badge.unhealthy {
+            background: #ef4444;
+            color: white;
+        }
+        .status-badge.checking {
+            background: #f59e0b;
+            color: white;
+        }
+        .probe-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+        .detail-label {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .detail-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+        }
+        .actions {
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #333;
+        }
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 30px;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 Health Dashboard</h1>
+            <p>Pata Digital - Status de Saúde da Aplicação</p>
+        </div>
+
+        <div class="dashboard">
+            <div id="liveness-probe" class="probe-card checking">
+                <div class="probe-header">
+                    <div class="probe-title">📡 Liveness Probe</div>
+                    <span class="status-badge checking">Verificando...</span>
+                </div>
+                <p style="margin-bottom: 15px; color: #666;">
+                    Verifica se o processo da aplicação está rodando
+                </p>
+                <div class="probe-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Endpoint</span>
+                        <span class="detail-value" id="liveness-endpoint">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Tempo de Resposta</span>
+                        <span class="detail-value" id="liveness-time">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Última Verificação</span>
+                        <span class="detail-value" id="liveness-timestamp">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="readiness-probe" class="probe-card checking">
+                <div class="probe-header">
+                    <div class="probe-title">🔌 Readiness Probe</div>
+                    <span class="status-badge checking">Verificando...</span>
+                </div>
+                <p style="margin-bottom: 15px; color: #666;">
+                    Verifica se a API está pronta para aceitar tráfego
+                </p>
+                <div class="probe-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Endpoint</span>
+                        <span class="detail-value" id="readiness-endpoint">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Tempo de Resposta</span>
+                        <span class="detail-value" id="readiness-time">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Última Verificação</span>
+                        <span class="detail-value" id="readiness-timestamp">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="health-overall" class="probe-card checking">
+                <div class="probe-header">
+                    <div class="probe-title">💚 Status Geral</div>
+                    <span class="status-badge checking">Verificando...</span>
+                </div>
+                <p style="margin-bottom: 15px; color: #666;">
+                    Saúde geral da aplicação e suas dependências
+                </p>
+                <div class="probe-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Aplicação</span>
+                        <span class="detail-value" id="app-status">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">API Externa</span>
+                        <span class="detail-value" id="api-status">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Próxima Verificação</span>
+                        <span class="detail-value" id="next-check">30s</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button class="btn-primary" onclick="runHealthChecks()">
+                    <span id="check-btn-text">Verificar Agora</span>
+                </button>
+                <button class="btn-secondary" onclick="toggleAutoCheck()">
+                    <span id="auto-check-btn-text">Ativar Auto-check</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Éder Lemes © 2026 | Edital 001/2026</p>
+        </div>
+    </div>
+
+    <script>
+        let autoCheckInterval = null;
+
+        async function checkLiveness() {
+            const startTime = Date.now();
+            try {
+                const response = await fetch('/health.html', { method: 'HEAD' });
+                const elapsed = Date.now() - startTime;
+                
+                updateProbeCard('liveness-probe', response.ok, {
+                    endpoint: '/health.html',
+                    time: `${elapsed}ms`,
+                    timestamp: new Date().toLocaleTimeString('pt-BR')
+                });
+                
+                return response.ok;
+            } catch (error) {
+                const elapsed = Date.now() - startTime;
+                updateProbeCard('liveness-probe', false, {
+                    endpoint: '/health.html',
+                    time: `${elapsed}ms (timeout)`,
+                    timestamp: new Date().toLocaleTimeString('pt-BR')
+                });
+                return false;
+            }
+        }
+
+        async function checkReadiness() {
+            const startTime = Date.now();
+            const apiUrl = 'https://pet-manager-api.geia.vip/q/health';
+            
+            try {
+                const response = await fetch(apiUrl);
+                const elapsed = Date.now() - startTime;
+                
+                updateProbeCard('readiness-probe', response.ok, {
+                    endpoint: '/q/health',
+                    time: `${elapsed}ms`,
+                    timestamp: new Date().toLocaleTimeString('pt-BR')
+                });
+                
+                return response.ok;
+            } catch (error) {
+                const elapsed = Date.now() - startTime;
+                updateProbeCard('readiness-probe', false, {
+                    endpoint: '/q/health',
+                    time: `${elapsed}ms (fail)`,
+                    timestamp: new Date().toLocaleTimeString('pt-BR')
+                });
+                return false;
+            }
+        }
+
+        function updateProbeCard(cardId, isHealthy, details) {
+            const card = document.getElementById(cardId);
+            const badge = card.querySelector('.status-badge');
+            
+            card.className = `probe-card ${isHealthy ? 'healthy' : 'unhealthy'}`;
+            badge.className = `status-badge ${isHealthy ? 'healthy' : 'unhealthy'}`;
+            badge.textContent = isHealthy ? '✓ Saudável' : '✗ Falhou';
+            
+            if (details.endpoint) {
+                const prefix = cardId.split('-')[0];
+                document.getElementById(`${prefix}-endpoint`).textContent = details.endpoint;
+                document.getElementById(`${prefix}-time`).textContent = details.time;
+                document.getElementById(`${prefix}-timestamp`).textContent = details.timestamp;
+            }
+        }
+
+        async function runHealthChecks() {
+            const btn = document.getElementById('check-btn-text');
+            btn.innerHTML = '<span class="spinner"></span> Verificando...';
+            
+            const liveness = await checkLiveness();
+            const readiness = await checkReadiness();
+            
+            const overallCard = document.getElementById('health-overall');
+            const overallBadge = overallCard.querySelector('.status-badge');
+            const allHealthy = liveness && readiness;
+            
+            overallCard.className = `probe-card ${allHealthy ? 'healthy' : 'unhealthy'}`;
+            overallBadge.className = `status-badge ${allHealthy ? 'healthy' : 'unhealthy'}`;
+            overallBadge.textContent = allHealthy ? '✓ Operacional' : '✗ Com Problemas';
+            
+            document.getElementById('app-status').textContent = liveness ? '✓ Online' : '✗ Offline';
+            document.getElementById('api-status').textContent = readiness ? '✓ Disponível' : '✗ Indisponível';
+            
+            btn.textContent = 'Verificar Novamente';
+        }
+
+        function toggleAutoCheck() {
+            const btn = document.getElementById('auto-check-btn-text');
+            
+            if (autoCheckInterval) {
+                clearInterval(autoCheckInterval);
+                autoCheckInterval = null;
+                btn.textContent = 'Ativar Auto-check';
+                document.getElementById('next-check').textContent = 'Desativado';
+            } else {
+                autoCheckInterval = setInterval(() => {
+                    runHealthChecks();
+                }, 30000);
+                btn.textContent = 'Desativar Auto-check';
+                
+                let countdown = 30;
+                setInterval(() => {
+                    countdown--;
+                    if (countdown <= 0) countdown = 30;
+                    document.getElementById('next-check').textContent = `${countdown}s`;
+                }, 1000);
+                
+                runHealthChecks();
+            }
+        }
+
+        window.onload = () => {
+            runHealthChecks();
+        };
+    </script>
+</body>
+</html>
