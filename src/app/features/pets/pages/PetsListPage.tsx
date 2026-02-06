@@ -6,6 +6,7 @@ import type { Pet } from "../models/pet.model"
 import { PetCard } from "../components/PetCard"
 import { Pagination } from "../components/Pagination"
 import { EmptyState } from "../../../shared/components/EmptyState"
+import { Spinner } from "../../../shared/components/Spinner"
 import { useDebounce } from "../../../shared/hooks/useDebounce"
 
 export function PetsListPage() {
@@ -74,7 +75,7 @@ export function PetsListPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
+    <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-800">Pets Disponíveis</h1>
@@ -86,7 +87,8 @@ export function PetsListPage() {
             <input
               type="text"
               placeholder="Buscar por nome..."
-              className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+              aria-label="Buscar pets por nome"
+              className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all"
               value={searchTerm}
               onChange={(e) => handleSearch(e.target.value)}
             />
@@ -106,7 +108,8 @@ export function PetsListPage() {
             {searchTerm && (
               <button
                 onClick={handleClearSearch}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                aria-label="Limpar busca"
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
               >
                 <svg
                   className="w-4 h-4"
@@ -126,18 +129,14 @@ export function PetsListPage() {
           </div>
           <Link
             to="/novo"
-            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors text-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors text-center focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
           >
             + Novo Pet
           </Link>
         </div>
       </div>
 
-      {loading && (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-200 border-t-blue-600" />
-        </div>
-      )}
+      {loading && <Spinner variant="orange" size="md" fullScreen={false} />}
 
       {!loading && pets.length > 0 && (
         <>
@@ -151,6 +150,7 @@ export function PetsListPage() {
             currentPage={pagination.page}
             totalPages={pagination.totalPages}
             onPageChange={handlePageChange}
+            variant="orange"
           />
         </>
       )}
