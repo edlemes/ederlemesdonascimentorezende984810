@@ -62,10 +62,10 @@ const setup = async (): Promise<SetupResult> => {
   mod.__testing.setRedirect(() => {})
 
   if (!requestInterceptor) {
-    throw new Error("request interceptor not registered")
+    throw new Error("interceptor de requisição não registrado")
   }
   if (!responseErrorInterceptor) {
-    throw new Error("response interceptor not registered")
+    throw new Error("interceptor de resposta não registrado")
   }
 
   return {
@@ -140,7 +140,7 @@ describe("http.service", () => {
     mod.__testing.setEnv({})
 
     await expect(requestInterceptor({ headers: {} })).rejects.toMatchObject({
-      message: "Authentication required",
+      message: "Autenticação necessária",
     })
   })
 
@@ -238,7 +238,7 @@ describe("http.service", () => {
     const p1 = responseErrorInterceptor(make401Error(req1) as any)
     const p2 = responseErrorInterceptor(make401Error(req2) as any)
 
-    const refreshError = new Error("refresh down")
+    const refreshError = new Error("refresh indisponível")
     rejectRefresh?.(refreshError)
 
     await expect(p2).rejects.toBe(refreshError)
@@ -277,7 +277,7 @@ describe("http.service", () => {
 
     mod.__testing.setEnv({ VITE_AUTH_USERNAME: "u", VITE_AUTH_PASSWORD: "p" })
 
-    refreshPut.mockRejectedValueOnce(new Error("network"))
+    refreshPut.mockRejectedValueOnce(new Error("rede"))
     axiosPost.mockResolvedValueOnce({ data: { token: "reauth-token" } })
 
     const req: { headers: Record<string, string> } = { headers: {} }
@@ -302,7 +302,7 @@ describe("http.service", () => {
     await expect(
       responseErrorInterceptor(make401Error(req) as any),
     ).rejects.toMatchObject({
-      message: "Authentication required",
+      message: "Autenticação necessária",
       isAuthError: true,
     })
 
@@ -382,10 +382,10 @@ describe("http.service", () => {
     const { requestInterceptor, axiosPost, mod } = await setup()
     mod.__testing.setEnv({ VITE_AUTH_USERNAME: "u", VITE_AUTH_PASSWORD: "p" })
 
-    axiosPost.mockRejectedValueOnce(new Error("login failed"))
+    axiosPost.mockRejectedValueOnce(new Error("falha no login"))
 
     await expect(requestInterceptor({ headers: {} })).rejects.toThrow(
-      "Authentication required",
+      "Autenticação necessária",
     )
   })
 
@@ -398,7 +398,7 @@ describe("http.service", () => {
     axiosPost.mockResolvedValueOnce({ data: {} })
 
     await expect(requestInterceptor({ headers: {} })).rejects.toThrow(
-      "Authentication required",
+      "Autenticação necessária",
     )
   })
 
@@ -416,7 +416,7 @@ describe("http.service", () => {
     mod.__testing.setRedirect(null)
 
     await expect(requestInterceptor({ headers: {} })).rejects.toThrow(
-      "Authentication required",
+      "Autenticação necessária",
     )
 
     Object.defineProperty(window, "location", {
@@ -434,7 +434,7 @@ describe("http.service", () => {
     let redirectCalled = false
     const throwingRedirect = () => {
       redirectCalled = true
-      throw new Error("Cannot navigate")
+      throw new Error("Não é possível navegar")
     }
     mod.__testing.setRedirect(throwingRedirect)
 
@@ -452,7 +452,7 @@ describe("http.service", () => {
 
     await expect(
       responseErrorInterceptor(make401Error(req) as any),
-    ).rejects.toThrow("Authentication required")
+    ).rejects.toThrow("Autenticação necessária")
   })
 
   it("tokenManager get/set/clear funcionam corretamente", async () => {
@@ -476,7 +476,7 @@ describe("http.service", () => {
     mod.__testing.setEnv({ VITE_AUTH_USERNAME: "u" })
 
     await expect(requestInterceptor({ headers: {} })).rejects.toThrow(
-      "Authentication required",
+      "Autenticação necessária",
     )
   })
 
@@ -487,7 +487,7 @@ describe("http.service", () => {
     mod.__testing.setEnv({ VITE_AUTH_PASSWORD: "p" })
 
     await expect(requestInterceptor({ headers: {} })).rejects.toThrow(
-      "Authentication required",
+      "Autenticação necessária",
     )
   })
 
@@ -498,7 +498,7 @@ describe("http.service", () => {
     mod.__testing.setEnv({ VITE_AUTH_USERNAME: "", VITE_AUTH_PASSWORD: "p" })
 
     await expect(requestInterceptor({ headers: {} })).rejects.toThrow(
-      "Authentication required",
+      "Autenticação necessária",
     )
   })
 
@@ -509,7 +509,7 @@ describe("http.service", () => {
     mod.__testing.setEnv({ VITE_AUTH_USERNAME: "u", VITE_AUTH_PASSWORD: "" })
 
     await expect(requestInterceptor({ headers: {} })).rejects.toThrow(
-      "Authentication required",
+      "Autenticação necessária",
     )
   })
 
@@ -536,7 +536,7 @@ describe("http.service", () => {
 
     Object.defineProperty(mockLocation, "href", {
       set: () => {
-        throw new Error("Cannot set href")
+        throw new Error("Não é possível definir href")
       },
       get: () => "/",
     })
@@ -548,7 +548,7 @@ describe("http.service", () => {
     })
 
     await expect(requestInterceptor({ headers: {} })).rejects.toThrow(
-      "Authentication required",
+      "Autenticação necessária",
     )
 
     Object.defineProperty(window, "location", {
