@@ -1,6 +1,6 @@
-import axios from "axios";
-import { API_URL } from "../api/http.service";
-import { API_ENDPOINTS } from "../api/api.endpoints";
+import axios from "axios"
+import { API_URL } from "../api/http.service"
+import { API_ENDPOINTS } from "../api/api.endpoints"
 
 export type HealthStatus = "healthy" | "unhealthy" | "checking";
 
@@ -13,27 +13,26 @@ export type HealthCheck = {
 
 export class HealthService {
   async checkHealth(): Promise<HealthCheck> {
-    const startTime = Date.now();
+    const startTime = Date.now()
 
     try {
       await axios.get(`${API_URL}${API_ENDPOINTS.health.check}`, {
         timeout: 5000,
-        params: { page: 0, size: 1 },
-      });
-      const responseTime = Date.now() - startTime;
+      })
+      const responseTime = Date.now() - startTime
 
       return {
         status: "healthy",
         timestamp: Date.now(),
         apiAvailable: true,
         responseTime,
-      };
+      }
     } catch {
       return {
         status: "unhealthy",
         timestamp: Date.now(),
         apiAvailable: false,
-      };
+      }
     }
   }
 
@@ -41,11 +40,10 @@ export class HealthService {
     try {
       await axios.get(`${API_URL}${API_ENDPOINTS.health.check}`, {
         timeout: 3000,
-        params: { page: 0, size: 1 },
-      });
-      return true;
+      })
+      return true
     } catch {
-      return false;
+      return false
     }
   }
 
@@ -55,14 +53,13 @@ export class HealthService {
         `${API_URL}${API_ENDPOINTS.health.check}`,
         {
           timeout: 3000,
-          params: { page: 0, size: 1 },
         },
-      );
-      return response.status === 200;
+      )
+      return response.status === 200
     } catch {
-      return false;
+      return false
     }
   }
 }
 
-export const healthService = new HealthService();
+export const healthService = new HealthService()
