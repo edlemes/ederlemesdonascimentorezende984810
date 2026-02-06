@@ -210,18 +210,18 @@ describe("PetsFacade", () => {
 
   it("deve tratar erro de upload de foto", async () => {
     const mockFile = new File(["photo"], "pet.jpg", { type: "image/jpeg" })
-    const error = new Error("Upload failed")
+    const error = new Error("Falha no upload")
     vi.mocked(mockService.uploadPhoto).mockRejectedValue(error)
 
     const errors: Array<string | null> = []
     const sub = facade.error$.subscribe((value) => errors.push(value))
 
     await expect(facade.uploadPhoto(1, mockFile)).rejects.toThrow(
-      "Upload failed",
+      "Falha no upload",
     )
 
     sub.unsubscribe()
-    expect(errors).toContain("Upload failed")
+    expect(errors).toContain("Falha no upload")
   })
 
   it("deve excluir foto e atualizar dados do pet", async () => {
@@ -284,20 +284,20 @@ describe("PetsFacade", () => {
   })
 
   it("deve tratar erro de exclusão de pet", async () => {
-    const error = new Error("Delete failed")
+    const error = new Error("Falha ao deletar")
     vi.mocked(mockService.remove).mockRejectedValue(error)
 
     const errors: Array<string | null> = []
     const sub = facade.error$.subscribe((value) => errors.push(value))
 
-    await expect(facade.deletePet(1)).rejects.toThrow("Delete failed")
+    await expect(facade.deletePet(1)).rejects.toThrow("Falha ao deletar")
 
     sub.unsubscribe()
-    expect(errors).toContain("Delete failed")
+    expect(errors).toContain("Falha ao deletar")
   })
 
   it("deve tratar erro de atualização de pet", async () => {
-    const error = new Error("Update failed")
+    const error = new Error("Falha na atualização")
     vi.mocked(mockService.update).mockRejectedValue(error)
 
     const errors: Array<string | null> = []
@@ -311,29 +311,29 @@ describe("PetsFacade", () => {
         raca: "Lab",
         idade: 5,
       }),
-    ).rejects.toThrow("Update failed")
+    ).rejects.toThrow("Falha na atualização")
 
     sub.unsubscribe()
-    expect(errors).toContain("Update failed")
+    expect(errors).toContain("Falha na atualização")
   })
 
   it("deve tratar erro de deletePhoto", async () => {
-    const error = new Error("Delete photo failed")
+    const error = new Error("Falha ao deletar foto")
     vi.mocked(mockService.deletePhoto).mockRejectedValue(error)
 
     const errors: Array<string | null> = []
     const sub = facade.error$.subscribe((value) => errors.push(value))
 
     await expect(facade.deletePhoto(1, 5)).rejects.toThrow(
-      "Delete photo failed",
+      "Falha ao deletar foto",
     )
 
     sub.unsubscribe()
-    expect(errors).toContain("Delete photo failed")
+    expect(errors).toContain("Falha ao deletar foto")
   })
 
   it("deve tratar erro de criação de pet", async () => {
-    const error = new Error("Create failed")
+    const error = new Error("Falha ao criar")
     vi.mocked(mockService.create).mockRejectedValue(error)
 
     const errors: Array<string | null> = []
@@ -346,14 +346,14 @@ describe("PetsFacade", () => {
         raca: "Lab",
         idade: 5,
       }),
-    ).rejects.toThrow("Create failed")
+    ).rejects.toThrow("Falha ao criar")
 
     sub.unsubscribe()
-    expect(errors).toContain("Create failed")
+    expect(errors).toContain("Falha ao criar")
   })
 
   it("deve tratar erro de getPetById", async () => {
-    const error = new Error("Failed to load pet")
+    const error = new Error("Falha ao carregar pet")
     vi.mocked(mockService.getById).mockRejectedValue(error)
 
     const errors: Array<string | null> = []
@@ -366,12 +366,12 @@ describe("PetsFacade", () => {
     subE.unsubscribe()
     subS.unsubscribe()
 
-    expect(errors).toContain("Failed to load pet")
+    expect(errors).toContain("Falha ao carregar pet")
     expect(selectedEmitted.at(-1)).toBeNull()
   })
 
   it("deve tratar erro de getAllPets", async () => {
-    const error = new Error("Failed to load pets")
+    const error = new Error("Falha ao carregar lista de pets")
     vi.mocked(mockService.getAll).mockRejectedValue(error)
 
     const errors: Array<string | null> = []
@@ -399,12 +399,12 @@ describe("PetsFacade", () => {
     expect(errors.at(-1)).toBeNull()
   })
 
-  it("em erro de auth com mensagem 'Authentication required', não seta error", async () => {
+  it("em erro de auth com mensagem 'Autenticação necessária', não seta error", async () => {
     const errors: Array<string | null> = []
     const subE = facade.error$.subscribe((v) => errors.push(v))
 
     vi.mocked(mockService.getAll).mockRejectedValue({
-      message: "Authentication required",
+      message: "Autenticação necessária",
     })
     await facade.getAllPets(0, "")
 
@@ -431,7 +431,7 @@ describe("PetsFacade", () => {
     await facade.getPetById(1)
 
     subE.unsubscribe()
-    expect(errors).toContain("Failed to load pet")
+    expect(errors).toContain("Falha ao carregar pet")
   })
 
   it("em erro de auth (401) em getPetById, não seta error", async () => {
@@ -513,7 +513,7 @@ describe("PetsFacade", () => {
     ).rejects.toBeTruthy()
 
     subE.unsubscribe()
-    expect(errors).toContain("Failed to save pet")
+    expect(errors).toContain("Falha ao salvar pet")
   })
 
   it("quando error não é Error instance em deletePet, usa mensagem padrão", async () => {
@@ -525,7 +525,7 @@ describe("PetsFacade", () => {
     await expect(facade.deletePet(1)).rejects.toBeTruthy()
 
     subE.unsubscribe()
-    expect(errors).toContain("Failed to delete pet")
+    expect(errors).toContain("Falha ao deletar pet")
   })
 
   it("quando error não é Error instance em uploadPhoto, usa mensagem padrão", async () => {
@@ -538,7 +538,7 @@ describe("PetsFacade", () => {
     await expect(facade.uploadPhoto(1, mockFile)).rejects.toBeTruthy()
 
     subE.unsubscribe()
-    expect(errors).toContain("Failed to upload photo")
+    expect(errors).toContain("Falha no upload da foto")
   })
 
   it("quando error não é Error instance em deletePhoto, usa mensagem padrão", async () => {
@@ -550,7 +550,7 @@ describe("PetsFacade", () => {
     await expect(facade.deletePhoto(1, 5)).rejects.toBeTruthy()
 
     subE.unsubscribe()
-    expect(errors).toContain("Failed to delete photo")
+    expect(errors).toContain("Falha ao deletar foto")
   })
 
   it("carrega pets com tutores associados e mapeia foto do tutor", async () => {
@@ -625,7 +625,9 @@ describe("PetsFacade", () => {
       total: 1,
     } as any)
 
-    vi.mocked(tutoresService.getById).mockRejectedValue(new Error("Not found"))
+    vi.mocked(tutoresService.getById).mockRejectedValue(
+      new Error("Não encontrado"),
+    )
 
     await facade.getAllPets(0, "")
     sub.unsubscribe()
@@ -646,7 +648,7 @@ describe("PetsFacade", () => {
       total: 1,
     })
 
-    vi.mocked(tutoresService.getAll).mockRejectedValue(new Error("Failed"))
+    vi.mocked(tutoresService.getAll).mockRejectedValue(new Error("Falha"))
 
     await facade.getAllPets(0, "")
     sub.unsubscribe()
@@ -796,7 +798,7 @@ describe("PetsFacade", () => {
     const savingStates: boolean[] = []
     const sub = facade.isSaving$.subscribe((value) => savingStates.push(value))
 
-    vi.mocked(mockService.create).mockRejectedValue(new Error("fail"))
+    vi.mocked(mockService.create).mockRejectedValue(new Error("falha"))
 
     await facade
       .savePet({ nome: "New", especie: "Gato", raca: "SRD", idade: 1 })
