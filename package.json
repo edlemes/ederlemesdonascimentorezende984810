@@ -1,5 +1,5 @@
 {
-  "name": "spa",
+  "name": "pata_digital",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -11,7 +11,9 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "health:check": "powershell -ExecutionPolicy Bypass -File ./scripts/health-check.ps1",
+    "health:check:docker": "powershell -ExecutionPolicy Bypass -File ./scripts/health-check.ps1 -Target docker"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",
