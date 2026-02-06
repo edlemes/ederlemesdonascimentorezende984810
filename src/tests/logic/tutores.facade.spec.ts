@@ -328,18 +328,18 @@ describe("TutoresFacade", () => {
 
   it("deve tratar erro de upload de foto", async () => {
     const mockFile = new File(["photo"], "tutor.jpg", { type: "image/jpeg" })
-    const error = new Error("Upload failed")
+    const error = new Error("Falha no upload")
     vi.mocked(mockTutoresService.uploadPhoto).mockRejectedValue(error)
 
     const errors: Array<string | null> = []
     const sub = facade.error$.subscribe((value) => errors.push(value))
 
     await expect(facade.uploadPhoto(1, mockFile)).rejects.toThrow(
-      "Upload failed",
+      "Falha no upload",
     )
 
     sub.unsubscribe()
-    expect(errors).toContain("Upload failed")
+    expect(errors).toContain("Falha no upload")
   })
 
   it("deve excluir foto e atualizar dados do tutor", async () => {
@@ -360,29 +360,31 @@ describe("TutoresFacade", () => {
   })
 
   it("deve tratar erro de linkPet", async () => {
-    const error = new Error("Link failed")
+    const error = new Error("Falha na vinculação")
     vi.mocked(mockTutoresService.linkPet).mockRejectedValue(error)
 
     const errors: Array<string | null> = []
     const sub = facade.error$.subscribe((value) => errors.push(value))
 
-    await expect(facade.linkPet(1, 5)).rejects.toThrow("Link failed")
+    await expect(facade.linkPet(1, 5)).rejects.toThrow("Falha na vinculação")
 
     sub.unsubscribe()
-    expect(errors).toContain("Link failed")
+    expect(errors).toContain("Falha na vinculação")
   })
 
   it("deve tratar erro de unlinkPet", async () => {
-    const error = new Error("Unlink failed")
+    const error = new Error("Falha na desvinculação")
     vi.mocked(mockTutoresService.unlinkPet).mockRejectedValue(error)
 
     const errors: Array<string | null> = []
     const sub = facade.error$.subscribe((value) => errors.push(value))
 
-    await expect(facade.unlinkPet(1, 5)).rejects.toThrow("Unlink failed")
+    await expect(facade.unlinkPet(1, 5)).rejects.toThrow(
+      "Falha na desvinculação",
+    )
 
     sub.unsubscribe()
-    expect(errors).toContain("Unlink failed")
+    expect(errors).toContain("Falha na desvinculação")
   })
 
   it("deve limpar tutor selecionado e pets vinculados", () => {
@@ -414,22 +416,22 @@ describe("TutoresFacade", () => {
   })
 
   it("deve tratar erro de deletePhoto", async () => {
-    const error = new Error("Delete photo failed")
+    const error = new Error("Falha ao deletar foto")
     vi.mocked(mockTutoresService.deletePhoto).mockRejectedValue(error)
 
     const errors: Array<string | null> = []
     const sub = facade.error$.subscribe((value) => errors.push(value))
 
     await expect(facade.deletePhoto(1, 5)).rejects.toThrow(
-      "Delete photo failed",
+      "Falha ao deletar foto",
     )
 
     sub.unsubscribe()
-    expect(errors).toContain("Delete photo failed")
+    expect(errors).toContain("Falha ao deletar foto")
   })
 
   it("deve tratar erro de saveTutor ao criar", async () => {
-    const error = new Error("Create failed")
+    const error = new Error("Falha ao criar")
     vi.mocked(mockTutoresService.create).mockRejectedValue(error)
 
     const errors: Array<string | null> = []
@@ -441,23 +443,23 @@ describe("TutoresFacade", () => {
         telefone: "123",
         endereco: "Rua",
       }),
-    ).rejects.toThrow("Create failed")
+    ).rejects.toThrow("Falha ao criar")
 
     sub.unsubscribe()
-    expect(errors).toContain("Create failed")
+    expect(errors).toContain("Falha ao criar")
   })
 
   it("deve tratar erro de exclusão de tutor", async () => {
-    const error = new Error("Delete failed")
+    const error = new Error("Falha ao deletar")
     vi.mocked(mockTutoresService.remove).mockRejectedValue(error)
 
     const errors: Array<string | null> = []
     const sub = facade.error$.subscribe((value) => errors.push(value))
 
-    await expect(facade.deleteTutor(1)).rejects.toThrow("Delete failed")
+    await expect(facade.deleteTutor(1)).rejects.toThrow("Falha ao deletar")
 
     sub.unsubscribe()
-    expect(errors).toContain("Delete failed")
+    expect(errors).toContain("Falha ao deletar")
   })
 
   it("remove tutor do estado ao deleteTutor", async () => {
@@ -497,7 +499,7 @@ describe("TutoresFacade", () => {
   })
 
   it("deve tratar erro de getAllTutores", async () => {
-    const error = new Error("Failed to load tutors")
+    const error = new Error("Falha ao carregar tutores")
     vi.mocked(mockTutoresService.getAll).mockRejectedValue(error)
 
     const errors: Array<string | null> = []
@@ -510,12 +512,12 @@ describe("TutoresFacade", () => {
     subE.unsubscribe()
     subT.unsubscribe()
 
-    expect(errors).toContain("Failed to load tutors")
+    expect(errors).toContain("Falha ao carregar tutores")
     expect(tutoresEmitted.at(-1)).toEqual([])
   })
 
   it("deve tratar erro de getTutorById", async () => {
-    const error = new Error("Failed to load tutor")
+    const error = new Error("Falha ao carregar tutor")
     vi.mocked(mockTutoresService.getById).mockRejectedValue(error)
 
     const errors: Array<string | null> = []
@@ -530,7 +532,7 @@ describe("TutoresFacade", () => {
     subE.unsubscribe()
     subS.unsubscribe()
 
-    expect(errors).toContain("Failed to load tutor")
+    expect(errors).toContain("Falha ao carregar tutor")
     expect(selectedEmitted.at(-1)).toBeNull()
   })
 
@@ -543,7 +545,7 @@ describe("TutoresFacade", () => {
     await facade.getAllTutores(0, "")
 
     subE.unsubscribe()
-    expect(errors).toContain("Failed to load tutors")
+    expect(errors).toContain("Falha ao carregar tutores")
   })
 
   it("quando error não é Error instance em getTutorById, usa mensagem padrão", async () => {
@@ -555,7 +557,7 @@ describe("TutoresFacade", () => {
     await facade.getTutorById(1)
 
     subE.unsubscribe()
-    expect(errors).toContain("Failed to load tutor")
+    expect(errors).toContain("Falha ao carregar tutor")
   })
 
   it("quando error não é Error instance em saveTutor, usa mensagem padrão", async () => {
@@ -569,7 +571,7 @@ describe("TutoresFacade", () => {
     ).rejects.toBeTruthy()
 
     subE.unsubscribe()
-    expect(errors).toContain("Failed to save tutor")
+    expect(errors).toContain("Falha ao salvar tutor")
   })
 
   it("quando error não é Error instance em deleteTutor, usa mensagem padrão", async () => {
@@ -581,7 +583,7 @@ describe("TutoresFacade", () => {
     await expect(facade.deleteTutor(1)).rejects.toBeTruthy()
 
     subE.unsubscribe()
-    expect(errors).toContain("Failed to delete tutor")
+    expect(errors).toContain("Falha ao deletar tutor")
   })
 
   it("quando error não é Error instance em uploadPhoto, usa mensagem padrão", async () => {
@@ -596,7 +598,7 @@ describe("TutoresFacade", () => {
     await expect(facade.uploadPhoto(1, mockFile)).rejects.toBeTruthy()
 
     subE.unsubscribe()
-    expect(errors).toContain("Failed to upload photo")
+    expect(errors).toContain("Falha no upload da foto")
   })
 
   it("quando error não é Error instance em linkPet, usa mensagem padrão", async () => {
@@ -608,7 +610,7 @@ describe("TutoresFacade", () => {
     await expect(facade.linkPet(1, 5)).rejects.toBeTruthy()
 
     subE.unsubscribe()
-    expect(errors).toContain("Failed to link pet")
+    expect(errors).toContain("Falha ao vincular pet")
   })
 
   it("quando error não é Error instance em unlinkPet, usa mensagem padrão", async () => {
@@ -622,7 +624,7 @@ describe("TutoresFacade", () => {
     await expect(facade.unlinkPet(1, 5)).rejects.toBeTruthy()
 
     subE.unsubscribe()
-    expect(errors).toContain("Failed to unlink pet")
+    expect(errors).toContain("Falha ao desvincular pet")
   })
 
   it("quando error não é Error instance em deletePhoto, usa mensagem padrão", async () => {
@@ -636,7 +638,7 @@ describe("TutoresFacade", () => {
     await expect(facade.deletePhoto(1, 5)).rejects.toBeTruthy()
 
     subE.unsubscribe()
-    expect(errors).toContain("Failed to delete photo")
+    expect(errors).toContain("Falha ao deletar foto")
   })
 
   it("mapeia linkedPets com fotoUrl quando não há foto", async () => {
