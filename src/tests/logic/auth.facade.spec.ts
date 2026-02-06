@@ -90,12 +90,12 @@ describe("AuthFacade", () => {
     )
 
     vi.mocked(mockAuthService.login).mockRejectedValue(
-      new Error("Invalid credentials"),
+      new Error("Credenciais inválidas"),
     )
 
     await expect(
       facade.login({ username: "wrong", password: "wrong" }),
-    ).rejects.toThrow("Invalid credentials")
+    ).rejects.toThrow("Credenciais inválidas")
 
     sub.unsubscribe()
 
@@ -263,7 +263,7 @@ describe("AuthFacade", () => {
 
   it("trata erro de refresh e limpa sessão", async () => {
     vi.mocked(mockAuthService.refresh).mockRejectedValue(
-      new Error("Refresh failed"),
+      new Error("Falha ao renovar token"),
     )
 
     const mockTokenMgrWithToken: TokenManager = {
@@ -396,7 +396,7 @@ describe("AuthFacade", () => {
     )
 
     vi.mocked(mockAuthService.login).mockRejectedValue(
-      new Error("Login failed"),
+      new Error("Falha no login"),
     )
 
     await localFacade.autoLogin()
